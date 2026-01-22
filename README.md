@@ -2,11 +2,11 @@
 
 > Extension Chrome professionnelle pour auditer l'accessibilité des sites web selon les normes WCAG 2.1
 
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/Caro639/accessibility-audit-extension)
 [![WCAG 2.1](https://img.shields.io/badge/WCAG-2.1-green)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-yellow?logo=javascript)](https://developer.mozilla.org)
 
-![Extension Preview](https://via.placeholder.com/800x400/3b82f6/ffffff?text=Screenshot+de+l%27extension)
+![Extension Preview](./xtension-accessibility.webp)
 
 ## 📖 Description
 
@@ -48,7 +48,7 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 1. **Cloner le repository**
 
    ```bash
-   git clone https://github.com/votre-username/accessibility-audit-extension.git
+   git clone https://github.com/Caro639/accessibility-audit-extension.git
    cd accessibility-audit-extension
    ```
 
@@ -92,7 +92,7 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 
 ## 📂 Structure du projet
 
-```
+```plaintext
 accessibility-audit-extension/
 ├── manifest.json          # Configuration de l'extension (Manifest V3)
 ├── content.js            # Analyse du DOM et détection des problèmes
@@ -117,7 +117,7 @@ Cliquez sur l'icône de l'extension pour analyser automatiquement la page active
 
 ### 3. Navigation vers les erreurs
 
-Cliquez sur **"📍 Voir dans la page"** pour scroller automatiquement vers l'élément problématique.
+Cliquez sur **"Voir dans la page"** pour scroller automatiquement vers l'élément problématique.
 
 ### 4. Exporter le rapport
 
@@ -175,9 +175,9 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 ## 📬 Contact
 
 **Développé par** : [Votre Nom]  
-**Email** : votre.email@exemple.com  
-**LinkedIn** : [Votre profil LinkedIn](https://linkedin.com/in/votre-profil)  
-**Portfolio** : [votre-portfolio.com](https://votre-portfolio.com)
+**Email** : [werner.carole7@gmail.com](mailto:werner.carole7@gmail.com)  
+**LinkedIn** : [Votre profil LinkedIn](https://www.linkedin.com/in/carole-werner-096a9b212)  
+**Portfolio** : [votre-portfolio.com](https://caro-developpeur.ozya.fr/)
 
 ## 🙏 Remerciements
 
@@ -190,8 +190,6 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 
 ⭐ **Si ce projet vous a été utile, n'hésitez pas à lui donner une étoile !**
 
-<div align="center">
-  
-  **Faisons ensemble un web plus accessible pour tous** 🌍♿
-  
-</div>
+---
+
+**Faisons ensemble un web plus accessible pour tous** 🌍♿
