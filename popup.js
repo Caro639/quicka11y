@@ -169,6 +169,8 @@ function copyGitHubMarkdown(issue, category, buttonElement) {
     markdown += `Associer un \`<label>\` à chaque champ de formulaire.\n`;
   } else if (category === "contrast") {
     markdown += `Améliorer le contraste pour atteindre un ratio minimum de 4.5:1 (AA) ou 7:1 (AAA).\n`;
+  } else if (category === "structure") {
+    markdown += `Vérifier la structure HTML du document (landmarks, régions ARIA).\n`;
   }
 
   markdown += `\n`;
@@ -183,6 +185,10 @@ function copyGitHubMarkdown(issue, category, buttonElement) {
     markdown += `- [MDN - Créer un lien avec une image](https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#cr%C3%A9er_un_lien_avec_une_image)\n`;
   } else if (category === "headings") {
     markdown += `- [MDN - Structurer le contenu avec des titres](https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/Heading_Elements#accessibilit%C3%A9)\n`;
+  } else if (category === "forms") {
+    markdown += `- [MDN - Formulaires accessibles](https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/input#accessibilit%C3%A9)\n`;
+  } else if (category === "structure") {
+    markdown += `- [MDN - Structure du document](https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique)\n`;
   }
 
   markdown += `- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)\n`;
@@ -352,6 +358,28 @@ async function navigateToHeading(headingId) {
     chrome.tabs.sendMessage(
       tab.id,
       { action: "scrollToHeading", headingId: headingId },
+      function (response) {
+        if (chrome.runtime.lastError) {
+          console.error("Erreur:", chrome.runtime.lastError);
+          return;
+        }
+      },
+    );
+  } catch (error) {
+    console.error("Erreur lors de la navigation:", error);
+  }
+}
+
+async function navigateToForm(formId) {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    chrome.tabs.sendMessage(
+      tab.id,
+      { action: "scrollToForm", formId: formId },
       function (response) {
         if (chrome.runtime.lastError) {
           console.error("Erreur:", chrome.runtime.lastError);
@@ -550,6 +578,7 @@ function displayCategory(name, data, contentId, badgeId) {
         ${issue.linkId ? `<button class="goto-btn" data-link-id="${issue.linkId}">Voir dans la page</button>` : ""}
         ${issue.svgId ? `<button class="goto-btn" data-svg-id="${issue.svgId}">Voir dans la page</button>` : ""}
         ${issue.headingId ? `<button class="goto-btn" data-heading-id="${issue.headingId}">Voir dans la page</button>` : ""}
+        ${issue.formId ? `<button class="goto-btn" data-form-id="${issue.formId}">Voir dans la page</button>` : ""}
         <button class="markdown-btn" data-issue-index="${issueIndex}" data-category="${name}">Copier Markdown</button>
       </div>
     `,
@@ -589,6 +618,15 @@ function displayCategory(name, data, contentId, badgeId) {
         btn.addEventListener("click", () => {
           const headingId = btn.getAttribute("data-heading-id");
           navigateToHeading(headingId);
+        });
+      });
+    }
+
+    if (name === "forms") {
+      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const formId = btn.getAttribute("data-form-id");
+          navigateToForm(formId);
         });
       });
     }
@@ -698,6 +736,18 @@ function getMdnLinks(category) {
       {
         title: "Structurer le contenu avec des titres",
         url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/Heading_Elements#accessibilit%C3%A9",
+      },
+    ],
+    forms: [
+      {
+        title: "Formulaires accessibles",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/input#accessibilit%C3%A9",
+      },
+    ],
+    structure: [
+      {
+        title: "Structure du document",
+        url: "https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique",
       },
     ],
   };

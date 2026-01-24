@@ -607,6 +607,33 @@ function checkForms() {
     'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select',
   );
   const issues = [];
+  let issueIndex = 0;
+
+  // Injecter les styles CSS pour les badges de formulaires (une seule fois)
+  if (!document.getElementById("accessibility-form-styles")) {
+    const style = document.createElement("style");
+    style.id = "accessibility-form-styles";
+    style.textContent = `
+      .accessibility-badge-form {
+        position: absolute;
+        top: -8px;
+        left: 0;
+        background: #f59e0b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        z-index: 999999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        animation: pulse-red 2s infinite;
+        white-space: nowrap;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   inputs.forEach((input, index) => {
     const id = input.id;
@@ -617,12 +644,50 @@ function checkForms() {
     const ariaLabelledby = input.getAttribute("aria-labelledby");
 
     if (!label && !ariaLabel && !ariaLabelledby) {
+      // Ajouter un ID unique pour la navigation
+      const formId = `accessibility-form-${issueIndex}`;
+      input.setAttribute("data-accessibility-id", formId);
+
+      // Ajouter un style visuel (bordure orange)
+      input.style.outline = "3px solid #f59e0b";
+      input.style.outlineOffset = "2px";
+      input.setAttribute("data-accessibility-issue", "form-no-label");
+
+      // Stocker l'élément pour le filtrage
+      markedElements.forms.push(input);
+
+      // Créer et ajouter un badge visuel orange
+      if (
+        !input.parentElement.querySelector(
+          `.accessibility-badge-form[data-badge-for="${formId}"]`,
+        )
+      ) {
+        const badge = document.createElement("div");
+        badge.className = "accessibility-badge-form";
+        badge.textContent = "⚠️ LABEL MANQUANT";
+        badge.setAttribute("data-badge-for", formId);
+
+        // Positionner le badge
+        const originalPosition = window.getComputedStyle(
+          input.parentElement,
+        ).position;
+        if (originalPosition === "static") {
+          input.parentElement.style.position = "relative";
+          input.parentElement.setAttribute("data-position-changed", "true");
+        }
+
+        input.parentElement.appendChild(badge);
+      }
+
       issues.push({
         element: `${input.tagName} ${index + 1}`,
         issue: "Champ de formulaire sans étiquette",
         severity: "élevée",
         type: input.type || "text",
+        formId: formId,
       });
+
+      issueIndex++;
     }
   });
 
@@ -893,6 +958,29 @@ function clearVisualFeedback() {
     }
   });
 
+  // Nettoyer les formulaires marqués
+  const markedForms = document.querySelectorAll(
+    '[data-accessibility-issue="form-no-label"]',
+  );
+  markedForms.forEach((form) => {
+    form.style.outline = "";
+    form.style.outlineOffset = "";
+    form.removeAttribute("data-accessibility-issue");
+    form.removeAttribute("data-accessibility-id");
+
+    // Retirer le badge du formulaire
+    const badge = form.parentElement.querySelector(".accessibility-badge-form");
+    if (badge) {
+      badge.remove();
+    }
+
+    // Restaurer la position du parent si elle a été changée
+    if (form.parentElement.getAttribute("data-position-changed") === "true") {
+      form.parentElement.style.position = "";
+      form.parentElement.removeAttribute("data-position-changed");
+    }
+  });
+
   // Retirer tous les badges orphelins (au cas où)
   document.querySelectorAll(".accessibility-badge").forEach((badge) => {
     badge.remove();
@@ -904,6 +992,9 @@ function clearVisualFeedback() {
     badge.remove();
   });
   document.querySelectorAll(".accessibility-badge-heading").forEach((badge) => {
+    badge.remove();
+  });
+  document.querySelectorAll(".accessibility-badge-form").forEach((badge) => {
     badge.remove();
   });
 
@@ -992,6 +1083,24 @@ function scrollToHeading(headingId) {
   }
 }
 
+// Fonction pour scroller vers un formulaire spécifique
+function scrollToForm(formId) {
+  const element = document.querySelector(`[data-accessibility-id="${formId}"]`);
+  if (element) {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    // Flash temporaire pour attirer l'attention
+    const originalOutline = element.style.outline;
+    element.style.outline = "6px solid #f59e0b";
+    setTimeout(() => {
+      element.style.outline = originalOutline;
+    }, 1000);
+  }
+}
+
 // Écouter les messages du popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "runAudit") {
@@ -1011,6 +1120,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
   } else if (request.action === "scrollToHeading") {
     scrollToHeading(request.headingId);
+    sendResponse({ success: true });
+  } else if (request.action === "scrollToForm") {
+    scrollToForm(request.formId);
     sendResponse({ success: true });
   } else if (request.action === "updateFilters") {
     updateVisualMarkersWithFilters(request.filters);
@@ -1107,6 +1219,23 @@ function updateVisualMarkersWithFilters(filters) {
     } else {
       heading.style.outline = "none";
       heading.style.outlineOffset = "0";
+      if (badge) badge.style.display = "none";
+    }
+  });
+
+  // Formulaires - utiliser le tableau stocké
+  markedElements.forms.forEach((form) => {
+    if (!form.parentElement) return;
+
+    const badge = form.parentElement.querySelector(".accessibility-badge-form");
+
+    if (filters.forms) {
+      form.style.outline = "4px solid #f59e0b";
+      form.style.outlineOffset = "2px";
+      if (badge) badge.style.display = "";
+    } else {
+      form.style.outline = "none";
+      form.style.outlineOffset = "0";
       if (badge) badge.style.display = "none";
     }
   });
