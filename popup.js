@@ -7,7 +7,7 @@ let activeFilters = {
   links: true,
   headings: true,
   forms: true,
-  contrast: true,
+  colorblind: true,
   structure: true,
   buttons: true,
 };
@@ -107,7 +107,7 @@ function copyGitHubMarkdown(issue, category, buttonElement) {
     links: "Lien",
     headings: "Titre",
     forms: "Formulaire",
-    contrast: "Contraste",
+    colorblind: "Daltonisme",
     structure: "Structure",
   };
 
@@ -167,8 +167,6 @@ function copyGitHubMarkdown(issue, category, buttonElement) {
   } else if (category === "forms") {
     markdown += `\`\`\`html\n<label for="input-id">Label du champ</label>\n<input id="input-id" type="text" />\n\`\`\`\n\n`;
     markdown += `Associer un \`<label>\` à chaque champ de formulaire.\n`;
-  } else if (category === "contrast") {
-    markdown += `Améliorer le contraste pour atteindre un ratio minimum de 4.5:1 (AA) ou 7:1 (AAA).\n`;
   } else if (category === "structure") {
     markdown += `Vérifier la structure HTML du document (landmarks, régions ARIA).\n`;
   }
@@ -216,115 +214,6 @@ function copyGitHubMarkdown(issue, category, buttonElement) {
       }, 2000);
     });
 }
-
-// function copyJiraTicket(issue, category, buttonElement) {
-//   const categoryNames = {
-//     images: "Image",
-//     svg: "SVG",
-//     links: "Lien",
-//     headings: "Titre",
-//     forms: "Formulaire",
-//     contrast: "Contraste",
-//     structure: "Structure",
-//   };
-
-//   const priorityMap = {
-//     élevée: "High",
-//     moyenne: "Medium",
-//     faible: "Low",
-//   };
-
-//   const categoryName = categoryNames[category] || category;
-//   const priority = priorityMap[issue.severity] || "Medium";
-
-//   // Générer le ticket Jira en format Markdown
-//   let jiraText = `h2. [Accessibilité] ${issue.issue}\n\n`;
-//   jiraText += `*Type:* ${categoryName}\n`;
-//   jiraText += `*Priorité:* ${priority}\n`;
-//   jiraText += `*Élément:* ${issue.element}\n\n`;
-
-//   jiraText += `h3. Description du problème\n\n`;
-//   jiraText += `${issue.issue}\n\n`;
-
-//   if (issue.explanation) {
-//     jiraText += `{panel:title=💡 Impact sur l'accessibilité|borderStyle=solid|borderColor=#fbbf24|bgColor=#fef3c7}\n`;
-//     jiraText += `${issue.explanation}\n`;
-//     jiraText += `{panel}\n\n`;
-//   }
-
-//   jiraText += `h3. Détails techniques\n\n`;
-//   if (issue.src) {
-//     jiraText += `*Source:* {{${issue.src}}}\n`;
-//   }
-//   if (issue.href) {
-//     jiraText += `*Lien:* {{${issue.href}}}\n`;
-//   }
-//   if (issue.text) {
-//     jiraText += `*Texte actuel:* "${issue.text}"\n`;
-//   }
-//   if (issue.type) {
-//     jiraText += `*Type:* ${issue.type}\n`;
-//   }
-
-//   jiraText += `\n`;
-//   jiraText += `h3. Solution recommandée\n\n`;
-
-//   // Suggestions selon le type d'erreur
-//   if (category === "images") {
-//     jiraText += `{code:html}\n<img src="..." alt="Description de l'image" />\n{code}\n\n`;
-//     jiraText += `Ajouter un attribut {{alt}} descriptif à l'image.\n`;
-//   } else if (category === "svg") {
-//     jiraText += `{code:html}\n<svg role="img" aria-label="Description du SVG">\n  <!-- ou -->\n  <title>Description du SVG</title>\n</svg>\n{code}\n\n`;
-//     jiraText += `Ajouter {{role="img"}} + {{aria-label}}, ou un élément {{<title>}} interne.\n`;
-//   } else if (category === "links") {
-//     jiraText += `{code:html}\n<a href="..." aria-label="Description du lien">Texte du lien</a>\n{code}\n\n`;
-//     jiraText += `Ajouter un texte descriptif ou un attribut {{aria-label}}.\n`;
-//   } else if (category === "headings") {
-//     jiraText += `Respecter la hiérarchie des titres (H1 → H2 → H3).\n`;
-//   } else if (category === "forms") {
-//     jiraText += `{code:html}\n<label for="input-id">Label du champ</label>\n<input id="input-id" type="text" />\n{code}\n\n`;
-//     jiraText += `Associer un {{<label>}} à chaque champ de formulaire.\n`;
-//   } else if (category === "contrast") {
-//     jiraText += `Améliorer le contraste pour atteindre un ratio minimum de 4.5:1 (AA) ou 7:1 (AAA).\n`;
-//   }
-
-//   jiraText += `\n`;
-//   jiraText += `h3. Ressources\n\n`;
-
-//   // Lien MDN spécifique selon la catégorie
-//   if (category === "images") {
-//     jiraText += `* [MDN - Accessibilité des images|https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#accessibilit%C3%A9]\n`;
-//   } else if (category === "svg") {
-//     jiraText += `* [MDN - Identifier le SVG comme une image|https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#identifier_le_svg_comme_une_image]\n`;
-//   } else if (category === "links") {
-//     jiraText += `* [MDN - Créer un lien avec une image|https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#cr%C3%A9er_un_lien_avec_une_image]\n`;
-//   }
-
-//   jiraText += `* [WCAG 2.1 Guidelines|https://www.w3.org/WAI/WCAG21/quickref/]\n`;
-//   jiraText += `* Testé avec l'extension Audit d'Accessibilité Web\n`;
-
-//   // Copier dans le presse-papier
-//   navigator.clipboard
-//     .writeText(jiraText)
-//     .then(() => {
-//       // Feedback visuel
-//       const originalText = buttonElement.textContent;
-//       buttonElement.textContent = "✓ Copié !";
-//       buttonElement.style.background = "#10b981";
-
-//       setTimeout(() => {
-//         buttonElement.textContent = originalText;
-//         buttonElement.style.background = "";
-//       }, 2000);
-//     })
-//     .catch((err) => {
-//       console.error("Erreur lors de la copie:", err);
-//       buttonElement.textContent = "❌ Erreur";
-//       setTimeout(() => {
-//         buttonElement.textContent = "📋 Copier pour Jira";
-//       }, 2000);
-//     });
-// }
 
 async function navigateToSVG(svgId) {
   try {
@@ -389,6 +278,29 @@ async function navigateToForm(formId) {
     );
   } catch (error) {
     console.error("Erreur lors de la navigation:", error);
+  }
+}
+
+// Fonction pour appliquer un filtre de daltonisme
+async function applyColorblindFilter(filterType) {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    chrome.tabs.sendMessage(
+      tab.id,
+      { action: "applyColorblindFilter", filterType: filterType },
+      function (response) {
+        if (chrome.runtime.lastError) {
+          console.error("Erreur:", chrome.runtime.lastError);
+          return;
+        }
+      },
+    );
+  } catch (error) {
+    console.error("Erreur lors de l'application du filtre:", error);
   }
 }
 
@@ -474,8 +386,7 @@ function displayResults(results) {
   document.getElementById("formsCategory").style.display = activeFilters.forms
     ? "block"
     : "none";
-  document.getElementById("contrastCategory").style.display =
-    activeFilters.contrast ? "block" : "none";
+  document.getElementById("colorblindCategory").style.display = "block";
   document.getElementById("structureCategory").style.display =
     activeFilters.structure || activeFilters.buttons ? "block" : "none";
 
@@ -495,12 +406,20 @@ function displayResults(results) {
     "headingsBadge",
   );
   displayCategory("forms", filteredResults.forms, "formsContent", "formsBadge");
-  displayCategory(
-    "contrast",
-    filteredResults.contrast,
-    "contrastContent",
-    "contrastBadge",
-  );
+
+  // Simulateur de daltonisme - ajouter les handlers de boutons
+  document.querySelectorAll(".colorblind-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filterType = btn.getAttribute("data-filter");
+      applyColorblindFilter(filterType);
+
+      // Feedback visuel
+      document
+        .querySelectorAll(".colorblind-btn")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
 
   // Combiner lang et landmarks pour la structure
   const structureIssues = [
@@ -631,16 +550,6 @@ function displayCategory(name, data, contentId, badgeId) {
       });
     }
 
-    // Ajouter les écouteurs pour les boutons Jira
-    // contentElement.querySelectorAll(".jira-btn").forEach((btn) => {
-    //   btn.addEventListener("click", () => {
-    //     const issueIndex = parseInt(btn.getAttribute("data-issue-index"));
-    //     const category = btn.getAttribute("data-category");
-    //     const issue = data.issues[issueIndex];
-    //     copyJiraTicket(issue, category, btn);
-    //   });
-    // });
-
     // Ajouter les écouteurs pour les boutons Markdown
     contentElement.querySelectorAll(".markdown-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -770,8 +679,8 @@ function filterResults(results) {
     forms: activeFilters.forms
       ? results.forms
       : { total: 0, issues: [], passed: 0 },
-    contrast: activeFilters.contrast
-      ? results.contrast
+    colorblind: activeFilters.colorblind
+      ? results.colorblind
       : { total: 0, issues: [], passed: 0 },
     lang: activeFilters.structure
       ? results.lang

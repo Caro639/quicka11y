@@ -26,7 +26,7 @@ function auditAccessibility() {
     links: checkLinks(),
     headings: checkHeadings(),
     forms: checkForms(),
-    contrast: checkContrast(),
+    colorblind: { total: 0, issues: [], passed: 0 },
     lang: checkLanguage(),
     landmarks: checkLandmarks(),
     buttons: checkButtons(),
@@ -698,86 +698,55 @@ function checkForms() {
   };
 }
 
-// Vérifier le contraste (version simplifiée)
-function checkContrast() {
-  const issues = [];
-  const textElements = document.querySelectorAll(
-    "p, span, div, a, button, h1, h2, h3, h4, h5, h6, li",
-  );
-  let checkedCount = 0;
+// Fonction pour injecter les filtres SVG de daltonisme dans la page
+function injectColorblindFilters() {
+  // Vérifier si les filtres existent déjà
+  if (document.getElementById("colorblind-filters")) {
+    return;
+  }
 
-  // On limite la vérification pour des raisons de performance
-  const elementsToCheck = Array.from(textElements).slice(0, 100);
-
-  elementsToCheck.forEach((element) => {
-    if (!element.textContent.trim()) return;
-
-    const style = window.getComputedStyle(element);
-    const bgColor = style.backgroundColor;
-    const color = style.color;
-
-    // Vérification simple: alerter si les couleurs sont trop similaires
-    if (bgColor && color) {
-      const contrast = calculateContrastRatio(color, bgColor);
-      if (contrast < 4.5) {
-        issues.push({
-          element: element.tagName,
-          issue: `Contraste insuffisant (ratio: ${contrast.toFixed(2)}:1)`,
-          severity: "moyenne",
-          text: element.textContent.substring(0, 30) + "...",
-        });
-      }
-      checkedCount++;
-    }
-  });
-
-  return {
-    total: checkedCount,
-    issues: issues.slice(0, 10), // Limiter à 10 résultats pour la lisibilité
-    passed: checkedCount - issues.length,
-  };
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.id = "colorblind-filters";
+  svg.style.position = "absolute";
+  svg.style.width = "0";
+  svg.style.height = "0";
+  svg.innerHTML = `
+    <defs>
+      <!-- Protanopie (perte du rouge) -->
+      <filter id="protanopia">
+        <feColorMatrix type="matrix" values="
+          0.567, 0.433, 0,     0, 0
+          0.558, 0.442, 0,     0, 0
+          0,     0.242, 0.758, 0, 0
+          0,     0,     0,     1, 0
+        "/>
+      </filter>
+      
+      <!-- Deutéranopie (perte du vert) -->
+      <filter id="deuteranopia">
+        <feColorMatrix type="matrix" values="
+          0.625, 0.375, 0,   0, 0
+          0.7,   0.3,   0,   0, 0
+          0,     0.3,   0.7, 0, 0
+          0,     0,     0,   1, 0
+        "/>
+      </filter>
+    </defs>
+  `;
+  document.body.appendChild(svg);
 }
 
-// Calculer le ratio de contraste (simplifié)
-function calculateContrastRatio(color1, color2) {
-  const rgb1 = parseRGB(color1);
-  const rgb2 = parseRGB(color2);
+// Fonction pour appliquer un filtre de daltonisme
+function applyColorblindFilter(filterType) {
+  injectColorblindFilters();
 
-  if (!rgb1 || !rgb2) return 21; // Valeur par défaut si parsing échoue
-
-  const l1 = getRelativeLuminance(rgb1);
-  const l2 = getRelativeLuminance(rgb2);
-
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-
-  return (lighter + 0.05) / (darker + 0.05);
-}
-
-function parseRGB(color) {
-  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  if (!match) return null;
-
-  return {
-    r: parseInt(match[1]),
-    g: parseInt(match[2]),
-    b: parseInt(match[3]),
-  };
-}
-
-function getRelativeLuminance(rgb) {
-  const rsRGB = rgb.r / 255;
-  const gsRGB = rgb.g / 255;
-  const bsRGB = rgb.b / 255;
-
-  const r =
-    rsRGB <= 0.03928 ? rsRGB / 12.92 : Math.pow((rsRGB + 0.055) / 1.055, 2.4);
-  const g =
-    gsRGB <= 0.03928 ? gsRGB / 12.92 : Math.pow((gsRGB + 0.055) / 1.055, 2.4);
-  const b =
-    bsRGB <= 0.03928 ? bsRGB / 12.92 : Math.pow((bsRGB + 0.055) / 1.055, 2.4);
-
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  if (filterType === "normal") {
+    document.body.style.filter = "";
+  } else if (filterType === "protanopia") {
+    document.body.style.filter = "url(#protanopia)";
+  } else if (filterType === "deuteranopia") {
+    document.body.style.filter = "url(#deuteranopia)";
+  }
 }
 
 // Vérifier l'attribut lang
@@ -806,8 +775,6 @@ function checkLandmarks() {
 
   const hasMain = document.querySelector('main, [role="main"]');
   const hasNav = document.querySelector('nav, [role="navigation"]');
-  const hasHeader = document.querySelector('header, [role="banner"]');
-  const hasFooter = document.querySelector('footer, [role="contentinfo"]');
 
   if (!hasMain) {
     issues.push({
@@ -1123,6 +1090,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
   } else if (request.action === "scrollToForm") {
     scrollToForm(request.formId);
+    sendResponse({ success: true });
+  } else if (request.action === "applyColorblindFilter") {
+    applyColorblindFilter(request.filterType);
     sendResponse({ success: true });
   } else if (request.action === "updateFilters") {
     updateVisualMarkersWithFilters(request.filters);

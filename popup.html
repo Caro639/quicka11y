@@ -42,7 +42,13 @@
               <h3>🧑‍🦯 Images</h3>
               <div class="category-controls">
                 <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="images" checked aria-label="Activer/désactiver l'audit des images" />
+                  <input
+                    type="checkbox"
+                    class="audit-filter"
+                    data-category="images"
+                    checked
+                    aria-label="Activer/désactiver l'audit des images"
+                  />
                   <span class="switch-slider-mini"></span>
                 </label>
                 <span class="badge" id="imagesBadge">0</span>
@@ -56,7 +62,13 @@
               <h3>🖼️ SVG Inline</h3>
               <div class="category-controls">
                 <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="svg" checked aria-label="Activer/désactiver l'audit des SVG" />
+                  <input
+                    type="checkbox"
+                    class="audit-filter"
+                    data-category="svg"
+                    checked
+                    aria-label="Activer/désactiver l'audit des SVG"
+                  />
                   <span class="switch-slider-mini"></span>
                 </label>
                 <span class="badge" id="svgBadge">0</span>
@@ -70,7 +82,13 @@
               <h3>🔗 Liens</h3>
               <div class="category-controls">
                 <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="links" checked aria-label="Activer/désactiver l'audit des liens" />
+                  <input
+                    type="checkbox"
+                    class="audit-filter"
+                    data-category="links"
+                    checked
+                    aria-label="Activer/désactiver l'audit des liens"
+                  />
                   <span class="switch-slider-mini"></span>
                 </label>
                 <span class="badge" id="linksBadge">0</span>
@@ -84,7 +102,13 @@
               <h3>📋 Titres</h3>
               <div class="category-controls">
                 <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="headings" checked aria-label="Activer/désactiver l'audit des titres" />
+                  <input
+                    type="checkbox"
+                    class="audit-filter"
+                    data-category="headings"
+                    checked
+                    aria-label="Activer/désactiver l'audit des titres"
+                  />
                   <span class="switch-slider-mini"></span>
                 </label>
                 <span class="badge" id="headingsBadge">0</span>
@@ -98,7 +122,13 @@
               <h3>📝 Formulaires</h3>
               <div class="category-controls">
                 <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="forms" checked aria-label="Activer/désactiver l'audit des formulaires" />
+                  <input
+                    type="checkbox"
+                    class="audit-filter"
+                    data-category="forms"
+                    checked
+                    aria-label="Activer/désactiver l'audit des formulaires"
+                  />
                   <span class="switch-slider-mini"></span>
                 </label>
                 <span class="badge" id="formsBadge">0</span>
@@ -107,18 +137,32 @@
             <div class="category-content" id="formsContent"></div>
           </div>
 
-          <div class="category" id="contrastCategory">
+          <div class="category" id="colorblindCategory">
             <div class="category-header">
-              <h3>🎨 Contraste</h3>
-              <div class="category-controls">
-                <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="contrast" checked aria-label="Activer/désactiver l'audit du contraste" />
-                  <span class="switch-slider-mini"></span>
-                </label>
-                <span class="badge" id="contrastBadge">0</span>
-              </div>
+              <h3>🎨 Simulateur de Daltonisme</h3>
             </div>
-            <div class="category-content" id="contrastContent"></div>
+            <div class="category-content" id="colorblindContent">
+              <p class="colorblind-description">
+                Testez votre site avec différents types de daltonisme :
+              </p>
+              <div class="colorblind-buttons">
+                <button class="colorblind-btn active" data-filter="normal">
+                  👁️ Vision Normale
+                </button>
+                <button class="colorblind-btn" data-filter="protanopia">
+                  🔴 Protanopie
+                </button>
+                <button class="colorblind-btn" data-filter="deuteranopia">
+                  🟢 Deutéranopie
+                </button>
+              </div>
+              <p class="colorblind-info">
+                <small>
+                  <strong>Protanopie</strong> : difficulté à voir le rouge<br />
+                  <strong>Deutéranopie</strong> : difficulté à voir le vert
+                </small>
+              </p>
+            </div>
           </div>
 
           <div class="category" id="structureCategory">
@@ -126,7 +170,13 @@
               <h3>🏗️ Structure</h3>
               <div class="category-controls">
                 <label class="category-switch">
-                  <input type="checkbox" class="audit-filter" data-category="structure" checked aria-label="Activer/désactiver l'audit de la structure" />
+                  <input
+                    type="checkbox"
+                    class="audit-filter"
+                    data-category="structure"
+                    checked
+                    aria-label="Activer/désactiver l'audit de la structure"
+                  />
                   <span class="switch-slider-mini"></span>
                 </label>
                 <span class="badge" id="structureBadge">0</span>
