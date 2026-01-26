@@ -803,17 +803,82 @@ function checkLandmarks() {
 function checkButtons() {
   const buttons = document.querySelectorAll("button");
   const issues = [];
+  let issueIndex = 0;
+
+  // Injecter les styles CSS pour les badges de boutons (une seule fois)
+  if (!document.getElementById("accessibility-button-styles")) {
+    const style = document.createElement("style");
+    style.id = "accessibility-button-styles";
+    style.textContent = `
+      .accessibility-badge-button {
+        position: absolute;
+        top: -8px;
+        left: 0;
+        background: #10b981;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        z-index: 999999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        animation: pulse-red 2s infinite;
+        white-space: nowrap;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   buttons.forEach((button, index) => {
     const text = button.textContent.trim();
     const ariaLabel = button.getAttribute("aria-label");
 
     if (!text && !ariaLabel) {
+      // Ajouter un ID unique pour la navigation
+      const buttonId = `accessibility-button-${issueIndex}`;
+      button.setAttribute("data-accessibility-id", buttonId);
+
+      // Ajouter un style visuel (bordure verte)
+      button.style.outline = "4px solid #10b981";
+      button.style.outlineOffset = "2px";
+      button.setAttribute("data-accessibility-issue", "button-no-text");
+
+      // Stocker l'élément pour le filtrage
+      markedElements.buttons.push(button);
+
+      // Créer et ajouter un badge visuel vert
+      if (
+        !button.parentElement.querySelector(
+          `.accessibility-badge-button[data-badge-for="${buttonId}"]`,
+        )
+      ) {
+        const badge = document.createElement("div");
+        badge.className = "accessibility-badge-button";
+        badge.textContent = "⚠️ TEXTE MANQUANT";
+        badge.setAttribute("data-badge-for", buttonId);
+
+        // Positionner le badge
+        const originalPosition = window.getComputedStyle(
+          button.parentElement,
+        ).position;
+        if (originalPosition === "static") {
+          button.parentElement.style.position = "relative";
+          button.parentElement.setAttribute("data-position-changed", "true");
+        }
+
+        button.parentElement.appendChild(badge);
+      }
+
       issues.push({
         element: `Bouton ${index + 1}`,
         issue: "Bouton sans texte descriptif",
         severity: "élevée",
+        buttonId: buttonId,
       });
+
+      issueIndex++;
     }
   });
 
@@ -948,6 +1013,31 @@ function clearVisualFeedback() {
     }
   });
 
+  // Nettoyer les boutons marqués
+  const markedButtons = document.querySelectorAll(
+    '[data-accessibility-issue="button-no-text"]',
+  );
+  markedButtons.forEach((button) => {
+    button.style.outline = "";
+    button.style.outlineOffset = "";
+    button.removeAttribute("data-accessibility-issue");
+    button.removeAttribute("data-accessibility-id");
+
+    // Retirer le badge du bouton
+    const badge = button.parentElement.querySelector(
+      ".accessibility-badge-button",
+    );
+    if (badge) {
+      badge.remove();
+    }
+
+    // Restaurer la position du parent si elle a été changée
+    if (button.parentElement.getAttribute("data-position-changed") === "true") {
+      button.parentElement.style.position = "";
+      button.parentElement.removeAttribute("data-position-changed");
+    }
+  });
+
   // Retirer tous les badges orphelins (au cas où)
   document.querySelectorAll(".accessibility-badge").forEach((badge) => {
     badge.remove();
@@ -962,6 +1052,9 @@ function clearVisualFeedback() {
     badge.remove();
   });
   document.querySelectorAll(".accessibility-badge-form").forEach((badge) => {
+    badge.remove();
+  });
+  document.querySelectorAll(".accessibility-badge-button").forEach((badge) => {
     badge.remove();
   });
 
@@ -1068,6 +1161,26 @@ function scrollToForm(formId) {
   }
 }
 
+// Fonction pour scroller vers un bouton spécifique
+function scrollToButton(buttonId) {
+  const element = document.querySelector(
+    `[data-accessibility-id="${buttonId}"]`,
+  );
+  if (element) {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    // Flash temporaire pour attirer l'attention
+    const originalOutline = element.style.outline;
+    element.style.outline = "6px solid #10b981";
+    setTimeout(() => {
+      element.style.outline = originalOutline;
+    }, 1000);
+  }
+}
+
 // Écouter les messages du popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "runAudit") {
@@ -1090,6 +1203,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
   } else if (request.action === "scrollToForm") {
     scrollToForm(request.formId);
+    sendResponse({ success: true });
+  } else if (request.action === "scrollToButton") {
+    scrollToButton(request.buttonId);
     sendResponse({ success: true });
   } else if (request.action === "applyColorblindFilter") {
     applyColorblindFilter(request.filterType);
@@ -1206,6 +1322,25 @@ function updateVisualMarkersWithFilters(filters) {
     } else {
       form.style.outline = "none";
       form.style.outlineOffset = "0";
+      if (badge) badge.style.display = "none";
+    }
+  });
+
+  // Boutons - utiliser le tableau stocké
+  markedElements.buttons.forEach((button) => {
+    if (!button.parentElement) return;
+
+    const badge = button.parentElement.querySelector(
+      ".accessibility-badge-button",
+    );
+
+    if (filters.buttons) {
+      button.style.outline = "4px solid #10b981";
+      button.style.outlineOffset = "2px";
+      if (badge) badge.style.display = "";
+    } else {
+      button.style.outline = "none";
+      button.style.outlineOffset = "0";
       if (badge) badge.style.display = "none";
     }
   });

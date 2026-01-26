@@ -2,3 +2,4 @@ README-DEV.md
 .vscode/
 LICENSE
 test.md
+node_modules/

@@ -281,6 +281,28 @@ async function navigateToForm(formId) {
   }
 }
 
+async function navigateToButton(buttonId) {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    chrome.tabs.sendMessage(
+      tab.id,
+      { action: "scrollToButton", buttonId: buttonId },
+      function (response) {
+        if (chrome.runtime.lastError) {
+          console.error("Erreur:", chrome.runtime.lastError);
+          return;
+        }
+      },
+    );
+  } catch (error) {
+    console.error("Erreur lors de la navigation:", error);
+  }
+}
+
 // Fonction pour appliquer un filtre de daltonisme
 async function applyColorblindFilter(filterType) {
   try {
@@ -498,6 +520,7 @@ function displayCategory(name, data, contentId, badgeId) {
         ${issue.svgId ? `<button class="goto-btn" data-svg-id="${issue.svgId}">Voir dans la page</button>` : ""}
         ${issue.headingId ? `<button class="goto-btn" data-heading-id="${issue.headingId}">Voir dans la page</button>` : ""}
         ${issue.formId ? `<button class="goto-btn" data-form-id="${issue.formId}">Voir dans la page</button>` : ""}
+        ${issue.buttonId ? `<button class="goto-btn" data-button-id="${issue.buttonId}">Voir dans la page</button>` : ""}
         <button class="markdown-btn" data-issue-index="${issueIndex}" data-category="${name}">Copier Markdown</button>
       </div>
     `,
@@ -546,6 +569,17 @@ function displayCategory(name, data, contentId, badgeId) {
         btn.addEventListener("click", () => {
           const formId = btn.getAttribute("data-form-id");
           navigateToForm(formId);
+        });
+      });
+    }
+
+    if (name === "structure") {
+      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const buttonId = btn.getAttribute("data-button-id");
+          if (buttonId) {
+            navigateToButton(buttonId);
+          }
         });
       });
     }
@@ -657,6 +691,10 @@ function getMdnLinks(category) {
       {
         title: "Structure du document",
         url: "https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique",
+      },
+      {
+        title: "Accessibilité des boutons",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/button#accessibilit%C3%A9",
       },
     ],
   };
