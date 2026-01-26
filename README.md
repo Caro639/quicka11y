@@ -140,11 +140,11 @@ Cliquez sur **"Voir dans la page"** pour scroller automatiquement vers l'éléme
 
 ### 6. Exporter le rapport
 
-Cliquez sur **"📥 Exporter le rapport"** pour télécharger un fichier texte détaillé.
+Cliquez sur **"Exporter le rapport"** pour télécharger un fichier texte détaillé.
 
 ### 7. Effacer les marqueurs
 
-Cliquez sur **"🧹 Effacer les marqueurs"** pour retirer les bordures rouges de la page.
+Cliquez sur **"Effacer les marqueurs"** pour retirer les bordures de couleur de la page.
 
 ## 🎓 Ce que ce projet démontre
 
@@ -177,7 +177,7 @@ Cliquez sur **"🧹 Effacer les marqueurs"** pour retirer les bordures rouges de
 - [ ] CI/CD avec GitHub Actions
 - [ ] Intégration avec axe-core pour analyses avancées
 - [ ] Export PDF avec jsPDF ou copier dans le presse-papiers pour un partage rapide et facile sur tout support.
-- [ ] Export audit en print version à imprimer dans un nouveau onglet
+- [ ] Export audit en print version à imprimer dans un nouvel onglet
 - [ ] Mode sombre
 - [ ] Historique des audits (Chrome Storage API)
 - [ ] Support multilingue (i18n)
