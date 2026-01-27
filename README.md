@@ -201,7 +201,7 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 
 ## 📬 Contact
 
-**Développé par** : [Votre Nom]  
+**Développé par** : [Carole Werner]  
 **Email** : [werner.carole7@gmail.com](mailto:werner.carole7@gmail.com)  
 **LinkedIn** : [Votre profil LinkedIn](https://www.linkedin.com/in/carole-werner-096a9b212)  
 **Portfolio** : [votre-portfolio.com](https://caro-developpeur.ozya.fr/)
