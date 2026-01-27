@@ -1,4 +1,4 @@
-# 🌐 Audit d'Accessibilité Web - Extension Chrome
+# <img src="./icon128.png" alt="Logo" width="48" height="48" align="center"> Audit d'Accessibilité Web - Extension Chrome
 
 > Extension Chrome professionnelle pour auditer l'accessibilité des sites web selon les normes WCAG 2.1
 
