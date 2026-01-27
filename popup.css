@@ -29,6 +29,16 @@ h1 {
   font-size: 24px;
   color: #0f172a;
   margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
 }
 
 .subtitle {
@@ -203,7 +213,7 @@ h1 {
 }
 
 .category-switch input[type="checkbox"]:checked + .switch-slider-mini {
-  background-color: #320909;
+  background-color: #4a16a3;
   /* background-color: #3b82f6; */
 }
 
@@ -212,7 +222,7 @@ h1 {
 }
 
 .category-switch:hover .switch-slider-mini {
-  box-shadow: 0 0 0 3px rgba(50, 9, 9, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 22, 163, 0.1);
 }
 
 .badge {
@@ -225,8 +235,8 @@ h1 {
 }
 
 .badge-error {
-  background: #fee2e2;
-  color: #dc2626;
+  background: #f3e8ff;
+  color: #4a16a3;
 }
 
 .badge-success {
@@ -263,8 +273,8 @@ h1 {
 
 /* Issues */
 .issue {
-  background: #fef2f2;
-  border-left: 4px solid #ef4444;
+  background: #f3e8ff;
+  border-left: 4px solid #4a16a3;
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 4px;
@@ -302,7 +312,7 @@ h1 {
 }
 
 .severity-élevée {
-  background: #dc2626;
+  background: #4a16a3;
   color: white;
 }
 
@@ -333,11 +343,11 @@ h1 {
 .issue-explanation {
   font-size: 12px;
   color: #0f172a;
-  background: #fef3c7;
+  background: #f0fdf4;
   padding: 8px 10px;
   border-radius: 6px;
   margin-top: 8px;
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid #16a34a;
   font-weight: 500;
 }
 
@@ -365,7 +375,7 @@ h1 {
   margin-top: 8px;
   margin-right: 6px;
   padding: 6px 12px;
-  background: #dc2626;
+  background: #4a16a3;
   color: white;
   border: none;
   border-radius: 6px;
@@ -379,7 +389,7 @@ h1 {
 }
 
 .goto-btn:hover {
-  background: #b91c1c;
+  background: #3a1182;
   transform: translateY(-1px);
 }
 
@@ -418,8 +428,7 @@ h1 {
 .markdown-btn {
   margin-top: 8px;
   padding: 6px 12px;
-  background: #320909;
-  /* background: #6b7280; */
+  background: #16a34a;
   color: white;
   border: none;
   border-radius: 6px;
@@ -433,8 +442,7 @@ h1 {
 }
 
 .markdown-btn:hover {
-  background: #0e0202;
-  /* background: #4b5563; */
+  background: #15803d;
   transform: translateY(-1px);
 }
 
@@ -461,13 +469,12 @@ h1 {
 }
 
 .export-btn {
-  background: #320909;
-  /* background: #3b82f6; */
+  background: #4a16a3;
   color: white;
 }
 
 .export-btn:hover {
-  background: #0e0202;
+  background: #3a1182;
 }
 
 .clear-btn {
@@ -548,9 +555,9 @@ h1 {
 }
 
 .colorblind-btn.active {
-  background: #3b82f6;
+  background: #4a16a3;
   color: white;
-  border-color: #3b82f6;
+  border-color: #4a16a3;
 }
 
 .colorblind-info {

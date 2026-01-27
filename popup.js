@@ -506,7 +506,7 @@ function displayCategory(name, data, contentId, badgeId) {
             ? getMdnLinks(name)
                 .map(
                   (link) =>
-                    `<p class="issue-mdn-link">📚 <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title}</a></p>`,
+                    `<p class="issue-mdn-link"><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title}</a></p>`,
                 )
                 .join("")
             : ""
@@ -651,50 +651,78 @@ function getMdnLinks(category) {
   const mdnLinks = {
     images: [
       {
-        title: "Accessibilité des images",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#accessibilit%C3%A9",
+        title: "Guide d'accessibilité des images (MDN)",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#accessibilit%C3%A9",
+      },
+      {
+        title: "Attribut alt pour les images",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#fournir_un_texte_de_remplacement_utile",
       },
     ],
     svg: [
       {
         title: "Identifier le SVG comme une image",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#identifier_le_svg_comme_une_image",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#identifier_le_svg_comme_une_image",
       },
       {
         title: "Accessibilité des SVG",
-        url: "https://developer.mozilla.org/fr/docs/Web/SVG/Guides/SVG_in_HTML#bonnes_pratiques",
+        url: "https://developer.mozilla.org/fr/docs/Web/SVG/Guides/SVG_in_HTML",
+      },
+      {
+        title: "Utiliser role='img' et aria-label",
+        url: "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/img_role#svg_and_roleimg",
       },
     ],
     links: [
       {
         title: "Accessibilité des liens",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/a#accessibilit%C3%A9",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/a#accessibilit%C3%A9",
       },
       {
         title: "Créer un lien avec une image",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/img#cr%C3%A9er_un_lien_avec_une_image",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#cr%C3%A9er_un_lien_avec_une_image",
+      },
+      {
+        title: "ARIA: link role",
+        url: "https://developer.mozilla.org/fr/docs/Web/Accessibility/ARIA/Roles/link_role",
       },
     ],
     headings: [
       {
         title: "Structurer le contenu avec des titres",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/Heading_Elements#accessibilit%C3%A9",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/Heading_Elements#accessibilit%C3%A9",
+      },
+      {
+        title: "Guide des titres et structure",
+        url: "https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique",
       },
     ],
     forms: [
       {
         title: "Formulaires accessibles",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/input#accessibilit%C3%A9",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/input#accessibilit%C3%A9",
+      },
+      {
+        title: "Élément label pour les formulaires",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/label#accessibilit%C3%A9",
+      },
+      {
+        title: "ARIA dans les formulaires",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/form",
       },
     ],
     structure: [
       {
-        title: "Structure du document",
+        title: "Structure du document et sémantique HTML",
         url: "https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique",
       },
       {
         title: "Accessibilité des boutons",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/button#accessibilit%C3%A9",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/button#accessibilit%C3%A9",
+      },
+      {
+        title: "Attribut lang pour la langue",
+        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Global_attributes/lang",
       },
     ],
   };
