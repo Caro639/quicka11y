@@ -1,6 +1,6 @@
-# <img src="./icon128.png" alt="Logo" width="48" height="48" align="center"> Audit d'Accessibilité Web - Extension Chrome
+# <img src="./icon128.png" alt="Logo" width="48" height="48" align="center"> QuickA11y - Quick Accessibility Audit
 
-> Extension Chrome professionnelle pour auditer l'accessibilité des sites web selon les normes WCAG 2.1
+> Extension Chrome pour identifier et corriger rapidement les problèmes d'accessibilité selon les normes WCAG 2.1
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue?logo=google-chrome)](https://github.com/Caro639/accessibility-audit-extension)
 [![WCAG 2.1](https://img.shields.io/badge/WCAG-2.1-green)](https://www.w3.org/WAI/WCAG21/quickref/)

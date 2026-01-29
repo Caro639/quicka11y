@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Audit d'Accessibilité Web",
+  "name": "QuickA11y",
   "version": "1.0.0",
-  "description": "Extension pour auditer l'accessibilité des pages web selon les normes WCAG",
+  "description": "Quick accessibility audit and fixes for WCAG compliance. Instantly identify and resolve web accessibility issues.",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_popup": "popup.html",
