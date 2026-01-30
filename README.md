@@ -10,7 +10,24 @@
 
 ![Extension Preview](./xtension-accessibility.webp)
 
-## 📖 Description
+## � Table des matières
+
+- [📖 Description](#-description)
+- [✨ Fonctionnalités](#-fonctionnalités)
+- [🚀 Installation](#-installation)
+- [📸 Captures d'écran](#-captures-décran)
+- [🛠️ Technologies](#️-technologies)
+- [📂 Structure du projet](#-structure-du-projet)
+- [💻 Utilisation](#-utilisation)
+- [👨‍💻 Développement](#-développement)
+- [🎓 Ce que ce projet démontre](#-ce-que-ce-projet-démontre)
+- [🚧 Roadmap / Améliorations futures](#-roadmap--améliorations-futures)
+- [🤝 Contribution](#-contribution)
+- [📄 Licence](#-licence)
+- [📬 Contact](#-contact)
+- [🙏 Remerciements](#-remerciements)
+
+## �📖 Description
 
 Extension Chrome permettant d'auditer l'accessibilité d'une page web en temps réel selon les normes **WCAG 2.1**. Elle analyse automatiquement la page active et génère un rapport détaillé avec des marqueurs visuels sur les éléments problématiques.
 
@@ -105,7 +122,39 @@ accessibility-audit-extension/
 
 ## 💻 Utilisation
 
-### 1. Installation des dépendances (pour développeurs)
+### 1. Lancer un audit
+
+Cliquez sur l'icône de l'extension pour analyser automatiquement la page active.
+
+### 2. Consulter les résultats
+
+- **Score global** affiché en haut
+- **Problèmes classés** par catégorie et sévérité
+- **Messages pédagogiques** expliquant chaque critère
+- **Ressources** pour chaque critère non conforme
+- **Activer/Désactiver** chaque type de test individuellement
+- **Compteurs** de tests réussis/échoués
+
+### 3. Navigation vers les erreurs
+
+Cliquez sur **"Voir dans la page"** pour scroller automatiquement vers l'élément problématique.
+
+### 4. Corriger les problèmes rapidement
+
+- Cliquez sur **"Copier Markdown"** pour copier le rapport dans le presse-papiers en format Markdown
+- Ou cliquez sur **"Exporter le rapport"** pour télécharger un fichier PDF détaillé
+
+### 5. Effacer les marqueurs
+
+Cliquez sur **"Effacer les marqueurs"** pour retirer toutes les bordures de couleur des éléments problématiques sur la page.
+
+### 6. Mode Daltonisme
+
+Activez le filtre daltonisme pour tester la perception des couleurs sur la page.
+
+## 👨‍💻 Développement
+
+### 1. Installation des dépendances
 
 ```bash
 npm install
@@ -125,40 +174,6 @@ npm run test:coverage
 ```
 
 📖 **[Voir le guide complet des tests](./test.md)**
-
-### 3. Lancer un audit (pour tous les utilisateurs)
-
-Cliquez sur l'icône de l'extension pour analyser automatiquement la page active.
-
-### 4. Consulter les résultats
-
-- **Score global** affiché en haut
-- **Problèmes classés** par catégorie et sévérité
-- **Messages pédagogiques** expliquant chaque critère
-- **Ressources** pour chaque critère non conforme
-- **Activer/Désactiver** chaque type de test individuellement
-- **Compteurs** de tests réussis/échoués
-
-### 5. Corriger les problèmes rapidement
-
-- Cliquez sur **"Copier Markdown"** pour copier le rapport dans le presse-papiers en format Markdown.
-- Ou cliquez sur **"Exporter le rapport"** pour télécharger un fichier PDF détaillé.
-
-### 6. Navigation vers les erreurs
-
-Cliquez sur **"Voir dans la page"** pour scroller automatiquement vers l'élément problématique.
-
-### 7. Exporter le rapport
-
-Cliquez sur **"Exporter le rapport"** pour télécharger un fichier PDF détaillé.
-
-### 8. Effacer les marqueurs
-
-Cliquez sur **"Effacer les marqueurs"** pour retirer toutes les bordures de couleur des éléments problématiques sur la page.
-
-### 9. Mode Daltonisme
-
-Activez le filtre daltonisme pour tester la perception des couleurs sur la page.
 
 ## 🎓 Ce que ce projet démontre
 
