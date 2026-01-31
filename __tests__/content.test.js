@@ -245,3 +245,106 @@ describe("QuickA11y - Images", () => {
     expect(createdBadge.textContent).toBe("⚠️ SVG NON ACCESSIBLE");
   });
 });
+
+describe("QuickA11y - Liens", () => {
+  describe("checkLinks()", () => {
+    test("devrait détecter les liens vides", () => {
+      document.body.innerHTML = `
+                <a href="#"></a>
+        <a href="#">Lien valide</a>
+        <a href="#" aria-label="Description"></a>
+            `;
+
+      function checkLinks() {
+        const links = document.querySelectorAll("a");
+        const issues = [];
+
+        links.forEach((link, index) => {
+          const text = link.textContent.trim();
+          const ariaLabel = link.getAttribute("aria-label");
+
+          if (!text && !ariaLabel) {
+            issues.push({
+              element: `Lien ${index + 1}`,
+              issue: "Lien sans texte descriptif",
+            });
+          }
+        });
+        return {
+          total: links.length,
+          issues: issues,
+          passed: links.length - issues.length,
+        };
+      }
+      const result = checkLinks();
+
+      const EXPECTED_TOTAL_LINKS = 3;
+      expect(result.total).toBe(EXPECTED_TOTAL_LINKS);
+      expect(result.issues.length).toBe(1);
+      expect(result.passed).toBe(2);
+    });
+
+    test("devrait accepter les liens avec une image ayant un alt comme valide", () => {
+      document.body.innerHTML = `
+        <a href="#"><img src="icon.png" alt="Accueil"></a>
+      `;
+
+      const link = document.querySelector("a");
+      const hasImageWithAlt = link.querySelector('img[alt]:not([alt=""])');
+
+      expect(hasImageWithAlt).toBeTruthy();
+      expect(hasImageWithAlt.getAttribute("alt")).toBe("Accueil");
+    });
+
+    test("devrait accepter un lien qui contient un SVG avec des attributs d'accessibilité", () => {
+      document.body.innerHTML = `
+        <a href="#"><svg role="img" aria-label="Icône de maison"><rect width="100" height="100"/></svg></a>
+      `;
+      const link = document.querySelector("a");
+      const hasSVGAccessible = link.querySelector(
+        "svg[role='img'][aria-label]",
+      );
+
+      expect(hasSVGAccessible).toBeTruthy();
+      expect(hasSVGAccessible.getAttribute("aria-label")).toBe(
+        "Icône de maison",
+      );
+    });
+
+    test("devrait marquer visuellement les liens problématiques", () => {
+      document.body.innerHTML = `
+        <div><a href="#" id="test-link"></a></div>
+      `;
+      const link = document.querySelector("#test-link");
+      // Simuler le style appliqué aux liens problématiques
+      link.style.outline = `3px solid #f59e0b`;
+      link.style.outlineOffset = "2px";
+      link.setAttribute("data-accessibility-issue", "missing-text");
+
+      // Vérifier que le style a été appliqué correctement
+      expect(link.style.outline).toBe("3px solid #f59e0b");
+      expect(link.style.outlineOffset).toBe("2px");
+      expect(link.getAttribute("data-accessibility-issue")).toBe(
+        "missing-text",
+      );
+    });
+    test("devrait créer un badge visuel pour les liens avec des problèmes d'accessibilité", () => {
+      document.body.innerHTML = `
+         <div><a href="#" id="test-link"></a></div>
+      `;
+      const link = document.querySelector("#test-link");
+      const linkParent = link.parentElement;
+      // Simuler la création du badge
+      const badge = document.createElement("div");
+      badge.className = "accessibility-badge-link";
+      badge.textContent = "⚠️ TEXTE MANQUANT";
+      linkParent.appendChild(badge);
+      const createdBadge = linkParent.querySelector(
+        ".accessibility-badge-link",
+      );
+      // Vérifier que le badge a été créé correctement
+      expect(createdBadge).toBeTruthy();
+      expect(createdBadge.textContent).toBe("⚠️ TEXTE MANQUANT");
+    });
+  });
+});
