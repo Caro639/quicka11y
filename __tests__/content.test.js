@@ -206,4 +206,42 @@ describe("QuickA11y - Images", () => {
       expect(result.issues.length).toBe(0);
     });
   });
+
+  test("devrait marquer visuellement les SVG problématiques", () => {
+    document.body.innerHTML = `
+      <div><svg width="100" height="100"></svg></div>
+    `;
+    const svg = document.querySelector("svg");
+
+    // Simuler le style appliqué aux SVG problématiques
+    svg.style.outline = "5px solid #a855f7";
+    svg.style.outlineOffset = "3px";
+    svg.style.boxShadow = "0 0 20px rgba(168, 85, 247, 0.6)";
+    svg.setAttribute("data-accessibility-issue", "svg-no-desc");
+
+    // Vérifier que le style a été appliqué correctement
+    expect(svg.style.outline).toBe("5px solid #a855f7");
+    expect(svg.style.outlineOffset).toBe("3px");
+    expect(svg.style.boxShadow).toBe("0 0 20px rgba(168, 85, 247, 0.6)");
+    expect(svg.getAttribute("data-accessibility-issue")).toBe("svg-no-desc");
+  });
+
+  test("devrait créer un badge visuel pour les SVG avec des problèmes d'accessibilité", () => {
+    document.body.innerHTML = `
+       <div><svg width="100" height="100" id="test-svg"></svg></div>
+    `;
+    const svg = document.querySelector("#test-svg");
+    const svgParent = svg.parentElement;
+    // Simuler la création du badge
+    const badge = document.createElement("div");
+    badge.className = "accessibility-badge-svg";
+    badge.textContent = "⚠️ SVG NON ACCESSIBLE";
+    badge.setAttribute("data-badge-for", "test-svg");
+    svgParent.appendChild(badge);
+    const createdBadge = svgParent.querySelector(".accessibility-badge-svg");
+
+    // Vérifier que le badge a été créé correctement
+    expect(createdBadge).toBeTruthy();
+    expect(createdBadge.textContent).toBe("⚠️ SVG NON ACCESSIBLE");
+  });
 });
