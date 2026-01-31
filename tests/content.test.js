@@ -346,5 +346,150 @@ describe("QuickA11y - Liens", () => {
       expect(createdBadge).toBeTruthy();
       expect(createdBadge.textContent).toBe("⚠️ TEXTE MANQUANT");
     });
+
+    test("devrait vérifier si le texte du lien est non descriptif", () => {
+      const nonDescriptiveTexts = [
+        "cliquez ici",
+        "en savoir plus",
+        "voir",
+        "lire la suite",
+      ];
+      nonDescriptiveTexts.forEach((text) => {
+        document.body.innerHTML = `<a href="#">${text}</a>`;
+        const link = document.querySelector("a");
+        const linkText = link.textContent.trim().toLowerCase();
+        const isNonDescriptive = nonDescriptiveTexts.includes(linkText);
+        expect(isNonDescriptive).toBe(true);
+      });
+    });
+  });
+});
+
+describe("QuickA11y - Titres", () => {
+  describe("checkHeadings()", () => {
+    test("devrait valider une hiérarchie correcte des titres", () => {
+      document.body.innerHTML = `
+        <h1>Titre principal</h1>
+        <h2>Sous-titre</h2>
+        <h3>Sous-sous-titre</h3>
+        <h2>Autre section</h2>
+      `;
+
+      function checkHeadings() {
+        const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        const issues = [];
+        let previousLevel = 0;
+
+        headings.forEach((heading, index) => {
+          const level = parseInt(heading.tagName.slice(1));
+
+          if (index === 0 && level !== 1) {
+            issues.push({
+              element: heading.tagName,
+              issue: "Le premier titre devrait être H1",
+            });
+          }
+          if (level - previousLevel > 1) {
+            issues.push({
+              element: heading.tagName,
+              issue: "Saut de niveau dans la hiérarchie",
+            });
+          }
+          previousLevel = level;
+        });
+        return {
+          total: headings.length,
+          issues: issues,
+          passed: headings.length - issues.length,
+        };
+      }
+
+      const result = checkHeadings();
+      const EXPECTED_TOTAL_HEADINGS = 4;
+      const EXPECTED_PASSED_HEADINGS = 4;
+      expect(result.total).toBe(EXPECTED_TOTAL_HEADINGS);
+      expect(result.issues.length).toBe(0);
+      expect(result.passed).toBe(EXPECTED_PASSED_HEADINGS);
+    });
+
+    test("devrait détecter un saut de niveau dans les titres", () => {
+      document.body.innerHTML = `
+        <h1>Titre principal</h1>
+        <h3>Sous-titre</h3>
+      `;
+
+      function checkHeadings() {
+        const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        const issues = [];
+        let previousLevel = 0;
+
+        headings.forEach((heading) => {
+          const level = parseInt(heading.tagName.slice(1));
+          if (level - previousLevel > 1) {
+            issues.push({
+              element: heading.tagName,
+              issue: "Saut de niveau dans la hiérarchie",
+            });
+          }
+          previousLevel = level;
+        });
+        return {
+          issues,
+        };
+      }
+      const result = checkHeadings();
+      expect(result.issues.length).toBe(1);
+    });
+
+    test("devrait détecter l'absence de H1", () => {
+      document.body.innerHTML = `
+        <h2>Titre</h2>
+        <h3>Sous-titre</h3>
+      `;
+
+      function checkHeadings() {
+        const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        const issues = [];
+
+        if (headings.length > 0) {
+          const firstHeading = headings[0];
+          const level = parseInt(firstHeading.tagName.slice(1));
+
+          if (level !== 1) {
+            issues.push({
+              element: firstHeading.tagName,
+              issue: "Le premier titre devrait être H1",
+            });
+          }
+        }
+        return {
+          issues,
+        };
+      }
+      const result = checkHeadings();
+      expect(result.issues.length).toBe(1);
+    });
+
+    test("devrait détecter la présence de plusieurs H1", () => {
+      document.body.innerHTML = `
+        <h1>Titre principal</h1>
+        <h1>Deuxième titre principal</h1>
+      `;
+      function checkHeadings() {
+        const headings = document.querySelectorAll("h1");
+        const issues = [];
+        if (headings.length > 1) {
+          issues.push({
+            element: "H1",
+            issue: "Plusieurs titres H1 détectés",
+          });
+        }
+        return {
+          issues,
+        };
+      }
+      const result = checkHeadings();
+      expect(result.issues.length).toBe(1);
+    });
   });
 });

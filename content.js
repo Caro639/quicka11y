@@ -531,7 +531,8 @@ function checkHeadings() {
 
   // Vérifier la hiérarchie
   headings.forEach((heading, index) => {
-    const level = parseInt(heading.tagName.charAt(1));
+    const level = parseInt(heading.tagName.slice(1));
+    // const level = parseInt(heading.tagName.charAt(1));
 
     if (previousLevel > 0 && level - previousLevel > 1) {
       // Add unique ID for navigation
