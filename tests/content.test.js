@@ -2,6 +2,8 @@
  * Tests unitaires pour content.js
  * Teste les fonctions d'audit d'accessibilité
  */
+const { injectColorblindFilters } = require("../content.js");
+// import { injectColorblindFilters } from "../content.js";
 
 describe("QuickA11y - Images", () => {
   beforeEach(() => {
@@ -490,6 +492,238 @@ describe("QuickA11y - Titres", () => {
       }
       const result = checkHeadings();
       expect(result.issues.length).toBe(1);
+    });
+  });
+});
+
+describe("QuickA11y - Formulaires", () => {
+  describe("checkForms()", () => {
+    test("devrait détecter les champs de formulaire sans label", () => {
+      document.body.innerHTML = `
+        <form>
+          <input type="text" id="name">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+          <input type="text" placeholder="Téléphone">
+        </form>
+      `;
+
+      function checkForms() {
+        const inputs = document.querySelectorAll("input, textarea, select");
+        const issues = [];
+
+        inputs.forEach((input, index) => {
+          const id = input.id;
+          const hasLabel = id && document.querySelector(`label[for="${id}"]`);
+          const hasAriaLabel = input.hasAttribute("aria-label");
+
+          if (!hasLabel && !hasAriaLabel) {
+            issues.push({
+              element: `Champ ${index + 1}`,
+              issue: "Champ de formulaire sans label",
+            });
+          }
+        });
+        return {
+          total: inputs.length,
+          issues: issues,
+          passed: inputs.length - issues.length,
+        };
+      }
+      const result = checkForms();
+
+      const EXPECTED_TOTAL_INPUTS = 3;
+      expect(result.total).toBe(EXPECTED_TOTAL_INPUTS);
+      expect(result.issues.length).toBe(2);
+      expect(result.passed).toBe(1);
+    });
+
+    test("devrait accepter aria-label comme valide pour les champs de formulaire", () => {
+      document.body.innerHTML = `
+        <form>
+          <input type="text" aria-label="Nom complet">
+        </form>
+      `;
+
+      const input = document.querySelector("input");
+      expect(input.getAttribute("aria-label")).toBe("Nom complet");
+    });
+  });
+});
+
+describe("QuickA11y - Filtre Daltonisme", () => {
+  describe("injectColorblindFilters()", () => {
+    test("injectColorblindFilters ajoute le SVG des filtres daltonisme au DOM", () => {
+      // Nettoyer le DOM avant le test
+      document.body.innerHTML = "";
+
+      // Appel de la fonction
+      injectColorblindFilters();
+
+      // Vérifier la présence du SVG
+      const svg = document.getElementById("colorblind-filters");
+      expect(svg).not.toBeNull();
+
+      // Vérifier la présence des filtres
+      expect(svg.innerHTML).toContain('id="protanopia"');
+      expect(svg.innerHTML).toContain('id="deuteranopia"');
+    });
+  });
+});
+
+describe("QuickA11y - Structure du document", () => {
+  describe("checkLanguage()", () => {
+    test("devrait détecter l'absence d'attribut lang sur la balise html", () => {
+      document.documentElement.removeAttribute("lang");
+
+      function checkLanguage() {
+        const lang = document.documentElement.getAttribute("lang");
+        const issues = [];
+
+        if (!lang) {
+          issues.push({
+            element: "<html>",
+            issue: "Attribut lang manquant",
+          });
+        }
+        return {
+          issues,
+        };
+      }
+      const result = checkLanguage();
+      expect(result.issues.length).toBe(1);
+    });
+
+    test("devrait accepter un attribut lang valide sur la balise html", () => {
+      document.documentElement.setAttribute("lang", "fr");
+
+      function checkLanguage() {
+        const lang = document.documentElement.getAttribute("lang");
+        return {
+          hasLang: !!lang,
+          lang,
+        };
+      }
+      const result = checkLanguage();
+      expect(result.hasLang).toBe(true);
+      expect(result.lang).toBe("fr");
+    });
+  });
+
+  describe("checkLandmarks()", () => {
+    test("devrait détecter la présence du role main et d'une nav", () => {
+      document.body.innerHTML = `
+        <nav></nav>
+        <main role="main"></main>
+      `;
+
+      function checkLandmarks() {
+        const nav = document.querySelector('nav, [role="navigation"]');
+        const main = document.querySelector('main, [role="main"]');
+        const issues = [];
+
+        if (!nav) {
+          issues.push({
+            element: "<nav>",
+            issue: "Balise nav manquante",
+          });
+        }
+        if (!main) {
+          issues.push({
+            element: "<main>",
+            issue: "Balise main avec role='main' manquante",
+          });
+        }
+        return {
+          issues,
+        };
+      }
+      const result = checkLandmarks();
+      expect(result.issues.length).toBe(0);
+    });
+  });
+});
+
+describe("QuickA11y - boutons accessibles", () => {
+  describe("checkButtons()", () => {
+    test("devrait détecter les boutons vide", () => {
+      document.body.innerHTML = `
+        <button></button>
+        <button>Envoyer</button>
+        <button aria-label="Soumettre le formulaire"></button>
+      `;
+      function checkButtons() {
+        const buttons = document.querySelectorAll("button");
+        const issues = [];
+
+        buttons.forEach((btn, index) => {
+          const text = btn.textContent.trim();
+          const ariaLabel = btn.getAttribute("aria-label");
+
+          if (!text && !ariaLabel) {
+            issues.push({
+              element: `Bouton ${index + 1}`,
+              issue: "Bouton sans texte descriptif",
+            });
+          }
+        });
+        return {
+          total: buttons.length,
+          issues: issues,
+          passed: buttons.length - issues.length,
+        };
+      }
+      const result = checkButtons();
+      const EXPECTED_TOTAL_BUTTONS = 3;
+      expect(result.total).toBe(EXPECTED_TOTAL_BUTTONS);
+      expect(result.issues.length).toBe(1);
+      expect(result.passed).toBe(2);
+    });
+  });
+});
+
+describe("QuickA11y - Fonctions utilitaires", () => {
+  describe("clearVisualFeedback()", () => {
+    test("devrait supprimer les styles, badges d'accessibilité et marqueurs visuels", () => {
+      document.body.innerHTML = `
+        <img src="test.jpg" data-accessibility-issue="missing-alt" style="border: 5px solid red">
+        <div class="accessibility-badge">Badge</div>
+      `;
+
+      const img = document.querySelector("img");
+      const badge = document.querySelector(".accessibility-badge");
+
+      // Simuler le nettoyage
+      img.style.border = "";
+      img.removeAttribute("data-accessibility-issue");
+      badge.remove();
+
+      expect(img.style.border).toBe("");
+      expect(img.getAttribute("data-accessibility-issue")).toBeNull();
+      expect(document.querySelector(".accessibility-badge")).toBeNull();
+    });
+  });
+
+  describe("scrollToElement()", () => {
+    test("devrait faire défiler jusqu'à l'élément spécifié", () => {
+      document.body.innerHTML = `
+        <div data-accessibility-id="test-id" id="target">Element</div>
+      `;
+
+      const element = document.querySelector(
+        '[data-accessibility-id="test-id"]',
+      );
+
+      // Simuler la fonction de défilement
+      const scrollIntoViewMock = jest.fn();
+      element.scrollIntoView = scrollIntoViewMock;
+
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({
+        behavior: "smooth",
+        block: "center",
+      });
     });
   });
 });

@@ -1432,3 +1432,4 @@ function updateVisualMarkersWithFilters(filters) {
     }
   });
 }
+module.exports = { injectColorblindFilters };
