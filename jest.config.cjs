@@ -13,7 +13,7 @@ module.exports = {
 
   // Configuration de la couverture de code
   collectCoverageFrom: [
-    "*.js",
+    "src/**/*.js",
     "!node_modules/**",
     "!coverage/**",
     "!jest.config.js",

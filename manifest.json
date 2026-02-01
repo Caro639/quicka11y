@@ -5,7 +5,7 @@
   "description": "Quick accessibility audit and fixes for WCAG compliance. Instantly identify and resolve web accessibility issues.",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
@@ -19,7 +19,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["report.html", "report.js"],
+      "resources": ["src/report/report.html", "src/report/report.js"],
       "matches": ["<all_urls>"]
     }
   ]

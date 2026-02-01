@@ -1,10 +1,10 @@
 ﻿// Popup script pour afficher les résultats de l'audit
 
-import { TIMEOUTS, SCORES } from "./constants.js";
+import { TIMEOUTS, SCORES } from "../utils/constants.js";
 import {
   generateGitHubMarkdown,
   copyMarkdownToClipboard,
-} from "./utils-markdown.js";
+} from "../utils/markdown.js";
 
 // État des filtres actifs
 const activeFilters = {
@@ -240,7 +240,7 @@ async function runAudit() {
           try {
             await chrome.scripting.executeScript({
               target: { tabId: tab.id },
-              files: ["content.js"],
+              files: ["src/content/content.js"],
             });
 
             // Attendre que le script soit prêt puis lancer l'audit
@@ -600,7 +600,7 @@ function exportReport(results, score) {
 
     chrome.storage.session.set({ reportData }, function () {
       // Ouvrir la page de rapport
-      const reportUrl = chrome.runtime.getURL("report.html");
+      const reportUrl = chrome.runtime.getURL("src/report/report.html");
       chrome.tabs.create({ url: reportUrl });
     });
   });
