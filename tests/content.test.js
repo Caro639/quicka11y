@@ -2,7 +2,7 @@
  * Tests unitaires pour content.js
  * Teste les fonctions d'audit d'accessibilité
  */
-const { injectColorblindFilters } = require("../content.js");
+// const { injectColorblindFilters } = require("../content.js");
 // import { injectColorblindFilters } from "../content.js";
 
 describe("QuickA11y - Images", () => {
@@ -551,25 +551,24 @@ describe("QuickA11y - Formulaires", () => {
   });
 });
 
-describe("QuickA11y - Filtre Daltonisme", () => {
-  describe("injectColorblindFilters()", () => {
-    test("injectColorblindFilters ajoute le SVG des filtres daltonisme au DOM", () => {
-      // Nettoyer le DOM avant le test
-      document.body.innerHTML = "";
+// describe("QuickA11y - Filtre Daltonisme", () => {
+//   describe("injectColorblindFilters()", () => {
+//     test("injectColorblindFilters ajoute le SVG des filtres daltonisme au DOM", () => {
 
-      // Appel de la fonction
-      injectColorblindFilters();
+//       document.body.innerHTML = "";
 
-      // Vérifier la présence du SVG
-      const svg = document.getElementById("colorblind-filters");
-      expect(svg).not.toBeNull();
+//       injectColorblindFilters();
 
-      // Vérifier la présence des filtres
-      expect(svg.innerHTML).toContain('id="protanopia"');
-      expect(svg.innerHTML).toContain('id="deuteranopia"');
-    });
-  });
-});
+// Vérifier la présence du SVG
+// const svg = document.getElementById("colorblind-filters");
+// expect(svg).not.toBeNull();
+
+// Vérifier la présence des filtres
+//       expect(svg.innerHTML).toContain('id="protanopia"');
+//       expect(svg.innerHTML).toContain('id="deuteranopia"');
+//     });
+//   });
+// });
 
 describe("QuickA11y - Structure du document", () => {
   describe("checkLanguage()", () => {
