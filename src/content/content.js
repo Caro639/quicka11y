@@ -768,7 +768,7 @@ function injectColorblindFilters() {
       <filter id="deuteranopia">
         <feColorMatrix type="matrix" values="
           0.625, 0.375, 0,   0, 0
-          0.7,   0.3,   0,   0, 0
+          0.3,   0.7,   0,   0, 0
           0,     0.3,   0.7, 0, 0
           0,     0,     0,   1, 0
         "/>
