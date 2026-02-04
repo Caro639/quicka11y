@@ -12,20 +12,41 @@
 
 ## � Table des matières
 
-- [📖 Description](#-description)
-- [✨ Fonctionnalités](#-fonctionnalités)
-- [🚀 Installation](#-installation)
-- [📸 Captures d'écran](#-captures-décran)
-- [🛠️ Technologies](#️-technologies)
-- [📂 Structure du projet](#-structure-du-projet)
-- [💻 Utilisation](#-utilisation)
-- [👨‍💻 Développement](#-développement)
-- [🎓 Ce que ce projet démontre](#-ce-que-ce-projet-démontre)
-- [🚧 Roadmap / Améliorations futures](#-roadmap--améliorations-futures)
-- [🤝 Contribution](#-contribution)
-- [📄 Licence](#-licence)
-- [📬 Contact](#-contact)
-- [🙏 Remerciements](#-remerciements)
+- [ QuickA11y - Quick Accessibility Audit](#-quicka11y---quick-accessibility-audit)
+  - [� Table des matières](#-table-des-matières)
+  - [�📖 Description](#-description)
+    - [🎯 Objectif](#-objectif)
+  - [✨ Fonctionnalités](#-fonctionnalités)
+    - [Analyses automatiques](#analyses-automatiques)
+    - [Fonctionnalités avancées](#fonctionnalités-avancées)
+  - [🚀 Installation](#-installation)
+    - [Prérequis](#prérequis)
+    - [Étapes d'installation](#étapes-dinstallation)
+  - [📸 Captures d'écran](#-captures-décran)
+    - [Interface principale](#interface-principale)
+    - [Marqueurs visuels](#marqueurs-visuels)
+    - [Rapport détaillé](#rapport-détaillé)
+    - [Mode Daltonisme \& Dark Mode](#mode-daltonisme--dark-mode)
+  - [🛠️ Technologies](#️-technologies)
+  - [📂 Structure du projet](#-structure-du-projet)
+  - [💻 Utilisation](#-utilisation)
+    - [1. Lancer un audit](#1-lancer-un-audit)
+    - [2. Consulter les résultats](#2-consulter-les-résultats)
+    - [3. Navigation vers les erreurs](#3-navigation-vers-les-erreurs)
+    - [4. Corriger les problèmes rapidement](#4-corriger-les-problèmes-rapidement)
+    - [5. Effacer les marqueurs](#5-effacer-les-marqueurs)
+    - [6. Mode Daltonisme](#6-mode-daltonisme)
+  - [👨‍💻 Développement](#-développement)
+    - [1. Installation des dépendances](#1-installation-des-dépendances)
+    - [2. Lancer les tests](#2-lancer-les-tests)
+  - [🎓 Ce que ce projet démontre](#-ce-que-ce-projet-démontre)
+    - [Compétences techniques](#compétences-techniques)
+    - [Connaissances métier](#connaissances-métier)
+  - [🚧 Roadmap / Améliorations futures](#-roadmap--améliorations-futures)
+  - [🤝 Contribution](#-contribution)
+  - [📄 Licence](#-licence)
+  - [📬 Contact](#-contact)
+  - [🙏 Remerciements](#-remerciements)
 
 ## �📖 Description
 
@@ -98,6 +119,10 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 ### Rapport détaillé
 
 <img src="./rapport-extension.webp" alt="Rapport" width="450">
+
+### Mode Daltonisme & Dark Mode
+
+<img src="./extension-dark-daltonisme.webp" alt="Daltonisme" width="450">
 
 ## 🛠️ Technologies
 
