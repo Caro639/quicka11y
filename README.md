@@ -114,7 +114,7 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 
 ### Marqueurs visuels
 
-<img src="./marqueurs-extension.webp" alt="Marqueurs" width="400">
+<img src="./marqueurs-extension.webp" alt="Marqueurs" width="450">
 
 ### Rapport détaillé
 
@@ -135,14 +135,36 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 ## 📂 Structure du projet
 
 ```plaintext
-accessibility-audit-extension/
+quicka11y/
 ├── manifest.json          # Configuration de l'extension (Manifest V3)
-├── content.js            # Analyse du DOM et détection des problèmes
-├── popup.html            # Interface utilisateur du popup
-├── popup.js              # Logique du popup et communication
-├── popup.css             # Styles de l'interface
-├── README.md             # Documentation (vous êtes ici)
-└── README-DEV.md         # Notes de développement
+├── package.json           # Dépendances et scripts NPM
+├── eslint.config.js       # Configuration ESLint
+├── jest.config.cjs        # Configuration Jest pour les tests
+├── jest.setup.js          # Configuration de l'environnement de test
+├── LICENSE                # Licence MIT
+├── README.md              # Documentation (vous êtes ici)
+├── README-DEV.md          # Notes de développement
+├── test.md                # Résultats des tests
+├── icon*.png              # Icônes de l'extension (16, 48, 128)
+├── *.webp                 # Captures d'écran pour la documentation
+├── test-*.html            # Pages HTML de test
+├── src/
+│   ├── content/
+│   │   └── content.js     # Analyse du DOM et détection des problèmes
+│   ├── popup/
+│   │   ├── popup.html     # Interface utilisateur du popup
+│   │   ├── popup.js       # Logique du popup et communication
+│   │   └── popup.css      # Styles de l'interface
+│   ├── report/
+│   │   ├── report.html    # Page de rapport détaillé
+│   │   └── report.js      # Logique du rapport
+│   └── utils/
+│       ├── constants.js   # Constantes partagées (timeouts, scores)
+│       └── markdown.js    # Génération et export Markdown
+└── tests/
+    ├── content.test.js    # Tests unitaires pour content.js
+    ├── popup.test.js      # Tests unitaires pour popup.js
+    └── report.test.js     # Tests unitaires pour report.js
 ```
 
 ## 💻 Utilisation
