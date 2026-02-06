@@ -114,7 +114,7 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 
 ### Marqueurs visuels
 
-<img src="./marqueurs-extension.webp" alt="Marqueurs" width="450">
+<img src="./marqueurs-extension.webp" alt="Marqueurs" width="400">
 
 ### Rapport détaillé
 

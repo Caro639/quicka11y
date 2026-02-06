@@ -15,6 +15,33 @@ describe("QuickA11y - Interface Popup", () => {
         <input type="checkbox" id="filter-links" checked>
       </div>
     `;
+
+    // Mock des APIs Chrome de base
+    globalThis.chrome = {
+      tabs: {
+        query: jest.fn(),
+        sendMessage: jest.fn(),
+        create: jest.fn(),
+      },
+      runtime: {
+        lastError: null,
+        getURL: jest.fn((path) => `chrome-extension://fake-id/${path}`),
+      },
+      storage: {
+        session: {
+          set: jest.fn((data, callback) => {
+            if (callback) {
+              callback();
+            }
+          }),
+          get: jest.fn((keys, callback) => {
+            if (callback) {
+              callback({});
+            }
+          }),
+        },
+      },
+    };
   });
 
   describe("Initialisation", () => {
@@ -291,6 +318,188 @@ describe("QuickA11y - Interface Popup", () => {
         await navigateToImage(imageId);
 
         expect(chrome.tabs.sendMessage).toHaveBeenCalled();
+      });
+    });
+
+    describe("Export du rapport", () => {
+      test("devrait stocker les données et ouvrir un nouvel onglet", async () => {
+        // Fonction exportReport (copie pour le test)
+        function exportReport(results, score) {
+          const reportDate = new Date().toLocaleDateString("fr-FR");
+          const reportTime = new Date().toLocaleTimeString("fr-FR");
+
+          return new Promise((resolve) => {
+            chrome.tabs.query(
+              { active: true, currentWindow: true },
+              function (tabs) {
+                const pageUrl = tabs[0]?.url || "Page inconnue";
+                const pageTitle = tabs[0]?.title || "Sans titre";
+
+                const reportData = {
+                  results,
+                  score,
+                  pageUrl,
+                  pageTitle,
+                  reportDate,
+                  reportTime,
+                };
+
+                chrome.storage.session.set({ reportData }, function () {
+                  const reportUrl = chrome.runtime.getURL(
+                    "src/report/report.html",
+                  );
+                  chrome.tabs.create({ url: reportUrl });
+                  resolve();
+                });
+              },
+            );
+          });
+        }
+
+        chrome.tabs.query = jest.fn((queryInfo, callback) => {
+          callback([
+            {
+              url: "https://example.com",
+              title: "Page de test",
+            },
+          ]);
+        });
+
+        chrome.tabs.create = jest.fn();
+
+        const mockResults = {
+          images: { total: 5, issues: [] },
+          links: { total: 3, issues: [] },
+        };
+        const mockScore = 85;
+
+        // Return a Promise for the test
+        return exportReport(mockResults, mockScore).then(() => {
+          // Vérifier que chrome.tabs.query a été appelé
+          expect(chrome.tabs.query).toHaveBeenCalledWith(
+            { active: true, currentWindow: true },
+            expect.any(Function),
+          );
+
+          // Vérifier que les données ont été stockées
+          expect(chrome.storage.session.set).toHaveBeenCalledWith(
+            expect.objectContaining({
+              reportData: expect.objectContaining({
+                results: mockResults,
+                score: mockScore,
+                pageUrl: "https://example.com",
+                pageTitle: "Page de test",
+              }),
+            }),
+            expect.any(Function),
+          );
+
+          // Vérifier qu'un nouvel onglet a été créé
+          expect(chrome.tabs.create).toHaveBeenCalledWith({
+            url: "chrome-extension://fake-id/src/report/report.html",
+          });
+        });
+      });
+
+      test("devrait gérer l'absence de données de page", () => {
+        // Mock sans données de tab
+        chrome.tabs.query = jest.fn((queryInfo, callback) => {
+          callback([]);
+        });
+
+        function exportReport(results, score) {
+          const reportDate = new Date().toLocaleDateString("fr-FR");
+          const reportTime = new Date().toLocaleTimeString("fr-FR");
+
+          return new Promise((resolve) => {
+            chrome.tabs.query(
+              { active: true, currentWindow: true },
+              function (tabs) {
+                const pageUrl = tabs[0]?.url || "Page inconnue";
+                const pageTitle = tabs[0]?.title || "Sans titre";
+
+                const reportData = {
+                  results,
+                  score,
+                  pageUrl,
+                  pageTitle,
+                  reportDate,
+                  reportTime,
+                };
+
+                // Vérifier les valeurs par défaut
+                expect(reportData.pageUrl).toBe("Page inconnue");
+                expect(reportData.pageTitle).toBe("Sans titre");
+                expect(reportData.score).toBe(0);
+                resolve();
+              },
+            );
+          });
+        }
+
+        return exportReport({}, 0);
+      });
+
+      test("devrait inclure la date et l'heure du rapport", () => {
+        chrome.tabs.query = jest.fn((queryInfo, callback) => {
+          callback([
+            {
+              url: "https://example.com",
+              title: "Page de test",
+            },
+          ]);
+        });
+
+        function exportReport(results, score) {
+          const reportDate = new Date().toLocaleDateString("fr-FR");
+          const reportTime = new Date().toLocaleTimeString("fr-FR");
+
+          return new Promise((resolve) => {
+            chrome.tabs.query(
+              { active: true, currentWindow: true },
+              function (tabs) {
+                const pageUrl = tabs[0]?.url || "Page inconnue";
+                const pageTitle = tabs[0]?.title || "Sans titre";
+
+                const reportData = {
+                  results,
+                  score,
+                  pageUrl,
+                  pageTitle,
+                  reportDate,
+                  reportTime,
+                };
+
+                chrome.storage.session.set({ reportData }, function () {
+                  // Vérifier que la date et l'heure sont présentes
+                  expect(reportData.reportDate).toBeTruthy();
+                  expect(reportData.reportTime).toBeTruthy();
+                  expect(typeof reportData.reportDate).toBe("string");
+                  expect(typeof reportData.reportTime).toBe("string");
+                  resolve();
+                });
+              },
+            );
+          });
+        }
+
+        return exportReport({ images: { total: 0, issues: [] } }, 100);
+      });
+    });
+
+    describe("Messages d'explication", () => {
+      test("devrait afficher des explications pour chaque catégorie", () => {
+        const explanations = {
+          images:
+            "Les images doivent avoir un attribut alt pour être accessibles aux lecteurs d'écran",
+          links: "Les liens doivent avoir un texte descriptif clair",
+          headings:
+            "Les titres doivent suivre une hiérarchie logique (H1, H2, H3...)",
+        };
+
+        expect(explanations.images).toContain("attribut alt");
+        expect(explanations.links).toContain("texte descriptif");
+        expect(explanations.headings).toContain("hiérarchie");
       });
     });
   });

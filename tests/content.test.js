@@ -364,6 +364,121 @@ describe("QuickA11y - Liens", () => {
         expect(isNonDescriptive).toBe(true);
       });
     });
+
+    test('devrait compter UN SEUL LIEN "en savoir plus" comme UNE SEULE issue', () => {
+      document.body.innerHTML = `
+        <p>Texte avant le lien</p>
+        <a href="page.html">en savoir plus</a>
+        <p>Texte après le lien</p>
+      `;
+
+      function checkLinks() {
+        const links = document.querySelectorAll("a");
+        const issues = [];
+        const nonDescriptiveTexts = [
+          "cliquez ici",
+          "en savoir plus",
+          "voir",
+          "lire la suite",
+        ];
+
+        links.forEach((link, index) => {
+          const text = link.textContent.trim();
+          const ariaLabel = link.getAttribute("aria-label");
+
+          if (!text && !ariaLabel) {
+            issues.push({
+              element: `Lien ${index + 1}`,
+              issue: "Lien sans texte descriptif",
+            });
+          } else if (
+            nonDescriptiveTexts.includes(text.toLowerCase()) &&
+            !ariaLabel
+          ) {
+            issues.push({
+              element: `Lien ${index + 1}`,
+              issue: "Texte de lien non descriptif",
+              text: text,
+            });
+          }
+        });
+
+        return {
+          total: links.length,
+          issues: issues,
+          passed: links.length - issues.length,
+        };
+      }
+
+      const result = checkLinks();
+
+      // Un seul lien = une seule issue
+      expect(result.total).toBe(1);
+      expect(result.issues.length).toBe(1);
+      expect(result.issues[0].text).toBe("en savoir plus");
+      expect(result.issues[0].issue).toBe("Texte de lien non descriptif");
+    });
+
+    test('devrait compter DEUX LIENS "en savoir plus" comme DEUX issues distinctes', () => {
+      document.body.innerHTML = `
+        <section>
+          <h2>Article 1</h2>
+          <a href="article1.html">en savoir plus</a>
+        </section>
+        <section>
+          <h2>Article 2</h2>
+          <a href="article2.html">en savoir plus</a>
+        </section>
+      `;
+
+      function checkLinks() {
+        const links = document.querySelectorAll("a");
+        const issues = [];
+        const nonDescriptiveTexts = [
+          "cliquez ici",
+          "en savoir plus",
+          "voir",
+          "lire la suite",
+        ];
+
+        links.forEach((link, index) => {
+          const text = link.textContent.trim();
+          const ariaLabel = link.getAttribute("aria-label");
+
+          if (!text && !ariaLabel) {
+            issues.push({
+              element: `Lien ${index + 1}`,
+              issue: "Lien sans texte descriptif",
+            });
+          } else if (
+            nonDescriptiveTexts.includes(text.toLowerCase()) &&
+            !ariaLabel
+          ) {
+            issues.push({
+              element: `Lien ${index + 1}`,
+              issue: "Texte de lien non descriptif",
+              text: text,
+            });
+          }
+        });
+
+        return {
+          total: links.length,
+          issues: issues,
+          passed: links.length - issues.length,
+        };
+      }
+
+      const result = checkLinks();
+
+      // Deux liens = deux issues
+      expect(result.total).toBe(2);
+      expect(result.issues.length).toBe(2);
+      expect(result.issues[0].element).toBe("Lien 1");
+      expect(result.issues[1].element).toBe("Lien 2");
+      expect(result.issues[0].text).toBe("en savoir plus");
+      expect(result.issues[1].text).toBe("en savoir plus");
+    });
   });
 });
 

@@ -21,7 +21,14 @@ const activeFilters = {
 // Stocker les résultats complets pour pouvoir les filtrer
 let fullResults = null;
 
+// Constantes pour la longueur maximale d'affichage des textes
+const MAX_TEXT_LENGTH = 80;
+const MAX_URL_LENGTH = 60;
+
 document.addEventListener("DOMContentLoaded", function () {
+  // Initialiser le mode dark
+  initDarkMode();
+
   runAudit();
 
   // Handler for markers clear button
@@ -31,6 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handlers for filters
   setupFilterHandlers();
+
+  // Handler for dark mode toggle
+  document
+    .getElementById("toggle-dark-mode")
+    .addEventListener("click", toggleDarkMode);
 });
 
 async function clearMarkers() {
@@ -290,51 +302,15 @@ function displayResults(results) {
   // Filtrer les résultats selon les filtres actifs
   const filteredResults = filterResults(results);
 
-  // Calculer le score global (basé sur les résultats filtrés)
-  let totalIssues = 0;
-  let totalTests = 0;
+  // Calculer et afficher le score
+  const score = calculateAndDisplayScore(filteredResults);
 
-  Object.values(filteredResults).forEach((category) => {
-    totalIssues += category.issues.length;
-    totalTests += category.total;
-  });
-
-  const score =
-    totalTests > 0 ? Math.round((1 - totalIssues / totalTests) * 100) : 100;
-
-  // Display score
-  document.getElementById("totalScore").textContent = `${score}%`;
-  document.getElementById("totalPassed").textContent = totalTests - totalIssues;
-  document.getElementById("totalFailed").textContent = totalIssues;
-
-  // Color the score
+  // Appliquer la couleur au score
   const scoreElement = document.getElementById("totalScore");
-  if (score >= SCORES.GOOD_THRESHOLD) {
-    scoreElement.style.color = "#10b981";
-  } else if (score >= SCORES.MEDIUM_THRESHOLD) {
-    scoreElement.style.color = "#f59e0b";
-  } else {
-    scoreElement.style.color = "#ef4444";
-  }
+  applyScoreColor(scoreElement, score);
 
-  // Masquer/afficher les catégories selon les filtres
-  document.getElementById("imagesCategory").style.display = activeFilters.images
-    ? "block"
-    : "none";
-  document.getElementById("svgCategory").style.display = activeFilters.svg
-    ? "block"
-    : "none";
-  document.getElementById("linksCategory").style.display = activeFilters.links
-    ? "block"
-    : "none";
-  document.getElementById("headingsCategory").style.display =
-    activeFilters.headings ? "block" : "none";
-  document.getElementById("formsCategory").style.display = activeFilters.forms
-    ? "block"
-    : "none";
-  document.getElementById("colorblindCategory").style.display = "block";
-  document.getElementById("structureCategory").style.display =
-    activeFilters.structure || activeFilters.buttons ? "block" : "none";
+  // Gérer la visibilité des catégories
+  toggleCategoriesVisibility();
 
   // Afficher les résultats par catégorie
   displayCategory(
@@ -353,39 +329,14 @@ function displayResults(results) {
   );
   displayCategory("forms", filteredResults.forms, "formsContent", "formsBadge");
 
-  // Simulateur de daltonisme - ajouter les handlers de boutons
-  document.querySelectorAll(".colorblind-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const filterType = btn.getAttribute("data-filter");
-      applyColorblindFilter(filterType);
+  // Attacher les listeners du simulateur de daltonisme
+  attachColorblindListeners();
 
-      // Feedback visuel
-      document
-        .querySelectorAll(".colorblind-btn")
-        .forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-    });
-  });
-
-  // Combine lang and landmarks for structure
-  const structureIssues = [
-    ...filteredResults.lang.issues,
-    ...filteredResults.landmarks.issues,
-    ...filteredResults.buttons.issues,
-  ];
+  // Afficher la catégorie structure combinée
+  const structureData = combineStructureData(filteredResults);
   displayCategory(
     "structure",
-    {
-      total:
-        filteredResults.lang.total +
-        filteredResults.landmarks.total +
-        filteredResults.buttons.total,
-      issues: structureIssues,
-      passed:
-        filteredResults.lang.passed +
-        filteredResults.landmarks.passed +
-        filteredResults.buttons.passed,
-    },
+    structureData,
     "structureContent",
     "structureBadge",
   );
@@ -399,170 +350,311 @@ function displayResults(results) {
   attachSwitchHandlers();
 }
 
-function displayCategory(name, data, contentId, badgeId) {
-  const contentElement = document.getElementById(contentId);
-  const badgeElement = document.getElementById(badgeId);
+// Calculer et afficher le score global
+function calculateAndDisplayScore(filteredResults) {
+  let totalIssues = 0;
+  let totalTests = 0;
 
-  badgeElement.textContent = data.issues.length;
+  Object.values(filteredResults).forEach((category) => {
+    totalIssues += category.issues.length;
+    totalTests += category.total;
+  });
 
-  if (data.issues.length > 0) {
+  const score =
+    totalTests > 0 ? Math.round((1 - totalIssues / totalTests) * 100) : 100;
+
+  document.getElementById("totalScore").textContent = `${score}%`;
+  document.getElementById("totalPassed").textContent = totalTests - totalIssues;
+  document.getElementById("totalFailed").textContent = totalIssues;
+
+  return score;
+}
+
+// Appliquer la couleur au score selon les seuils
+function applyScoreColor(scoreElement, score) {
+  if (score >= SCORES.GOOD_THRESHOLD) {
+    scoreElement.style.color = "#10b981";
+  } else if (score >= SCORES.MEDIUM_THRESHOLD) {
+    scoreElement.style.color = "#f59e0b";
+  } else {
+    scoreElement.style.color = "#ef4444";
+  }
+}
+
+// Gérer la visibilité des catégories selon les filtres actifs
+function toggleCategoriesVisibility() {
+  document.getElementById("imagesCategory").style.display = activeFilters.images
+    ? "block"
+    : "none";
+  document.getElementById("svgCategory").style.display = activeFilters.svg
+    ? "block"
+    : "none";
+  document.getElementById("linksCategory").style.display = activeFilters.links
+    ? "block"
+    : "none";
+  document.getElementById("headingsCategory").style.display =
+    activeFilters.headings ? "block" : "none";
+  document.getElementById("formsCategory").style.display = activeFilters.forms
+    ? "block"
+    : "none";
+  document.getElementById("colorblindCategory").style.display = "block";
+  document.getElementById("structureCategory").style.display =
+    activeFilters.structure || activeFilters.buttons ? "block" : "none";
+}
+
+// Attacher les event listeners pour le simulateur de daltonisme
+function attachColorblindListeners() {
+  document.querySelectorAll(".colorblind-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filterType = btn.getAttribute("data-filter");
+      applyColorblindFilter(filterType);
+
+      // Feedback visuel
+      document
+        .querySelectorAll(".colorblind-btn")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+}
+
+// Combiner les données de structure (lang, landmarks, buttons)
+function combineStructureData(filteredResults) {
+  const structureIssues = [
+    ...filteredResults.lang.issues,
+    ...filteredResults.landmarks.issues,
+    ...filteredResults.buttons.issues,
+  ];
+
+  return {
+    total:
+      filteredResults.lang.total +
+      filteredResults.landmarks.total +
+      filteredResults.buttons.total,
+    issues: structureIssues,
+    passed:
+      filteredResults.lang.passed +
+      filteredResults.landmarks.passed +
+      filteredResults.buttons.passed,
+  };
+}
+
+// Configuration des handlers de navigation par catégorie
+const NAVIGATION_CONFIG = {
+  images: { attr: "data-image-id", handler: navigateToImage },
+  links: { attr: "data-link-id", handler: navigateToLink },
+  svg: { attr: "data-svg-id", handler: navigateToSVG },
+  headings: { attr: "data-heading-id", handler: navigateToHeading },
+  forms: { attr: "data-form-id", handler: navigateToForm },
+  structure: { attr: "data-button-id", handler: navigateToButton },
+};
+
+// Générer le HTML des liens MDN
+function generateMdnLinksHTML(name, issueIndex) {
+  const mdnLinks = getMdnLinks(name);
+
+  if (mdnLinks.length === 0) {
+    return "";
+  }
+
+  const linksContent = mdnLinks
+    .map(
+      (link) =>
+        `<p class="issue-mdn-link"><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title}</a></p>`,
+    )
+    .join("");
+
+  // Première erreur : afficher les liens normalement
+  if (issueIndex === 0) {
+    return linksContent;
+  }
+
+  // Erreurs suivantes : bouton repliable
+  return `
+    <div class="mdn-links-collapsed">
+      <span class="toggle-resources-link" data-resources-id="res-${name}-${issueIndex}">
+        <svg class="resources-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="resources-text">Ressources</span>
+      </span>
+      <div class="mdn-links-content" id="res-${name}-${issueIndex}" style="display: none;">
+        ${linksContent}
+      </div>
+    </div>
+  `;
+}
+
+// Générer le HTML des détails de l'issue
+function generateIssueDetailsHTML(issue) {
+  const details = [];
+
+  if (issue.text) {
+    const truncatedText =
+      issue.text.length > MAX_TEXT_LENGTH
+        ? `${issue.text.substring(0, MAX_TEXT_LENGTH)}...`
+        : issue.text;
+    details.push(`<p class="issue-detail">Texte: "${truncatedText}"</p>`);
+  }
+
+  if (issue.src) {
+    const truncatedSrc =
+      issue.src.length > MAX_URL_LENGTH
+        ? `${issue.src.substring(0, MAX_URL_LENGTH)}...`
+        : issue.src;
+    details.push(`<p class="issue-detail">Source: ${truncatedSrc}</p>`);
+  }
+
+  if (issue.href) {
+    const truncatedHref =
+      issue.href.length > MAX_URL_LENGTH
+        ? `${issue.href.substring(0, MAX_URL_LENGTH)}...`
+        : issue.href;
+    details.push(`<p class="issue-detail">Lien: ${truncatedHref}</p>`);
+  }
+
+  if (issue.type) {
+    details.push(`<p class="issue-detail">Type: ${issue.type}</p>`);
+  }
+
+  return details.join("");
+}
+
+// Générer le HTML des boutons de navigation
+function generateNavigationButtonsHTML(issue) {
+  const buttons = [];
+  const idTypes = [
+    "imageId",
+    "linkId",
+    "svgId",
+    "headingId",
+    "formId",
+    "buttonId",
+  ];
+
+  idTypes.forEach((idType) => {
+    if (issue[idType]) {
+      buttons.push(
+        `<button class="goto-btn" data-${idType.replace(/Id$/, "-id")}="${issue[idType]}">Voir dans la page</button>`,
+      );
+    }
+  });
+
+  return buttons.join("");
+}
+
+// Générer le HTML d'une issue
+function generateIssueHTML(issue, issueIndex, name) {
+  const mdnLinksHTML = generateMdnLinksHTML(name, issueIndex);
+  const detailsHTML = generateIssueDetailsHTML(issue);
+  const navigationButtonsHTML = generateNavigationButtonsHTML(issue);
+
+  const explanationHTML = issue.explanation
+    ? `<p class="issue-explanation"><svg class="explanation-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13 15.87 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${issue.explanation}</p>`
+    : "";
+
+  return `
+    <div class="issue ${issue.severity}">
+      <div class="issue-header">
+        <span class="issue-element">${issue.element}</span>
+        <span class="severity-badge severity-${issue.severity}">${issue.severity}</span>
+      </div>
+      <p class="issue-description">${issue.issue}</p>
+      ${explanationHTML}
+      ${mdnLinksHTML}
+      ${detailsHTML}
+      ${navigationButtonsHTML}
+      <button class="markdown-btn" data-issue-index="${issueIndex}" data-category="${name}">Copier Markdown</button>
+    </div>
+  `;
+}
+
+// Attacher les event listeners pour les boutons de navigation
+function attachNavigationListeners(contentElement, name) {
+  const config = NAVIGATION_CONFIG[name];
+  if (!config) {
+    return;
+  }
+
+  contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const elementId = btn.getAttribute(config.attr);
+      if (elementId) {
+        config.handler(elementId);
+      }
+    });
+  });
+}
+
+// Attacher les event listeners pour les boutons Markdown
+function attachMarkdownListeners(contentElement, data) {
+  contentElement.querySelectorAll(".markdown-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const issueIndex = parseInt(btn.getAttribute("data-issue-index"));
+      const category = btn.getAttribute("data-category");
+      const issue = data.issues[issueIndex];
+      copyGitHubMarkdown(issue, category, btn);
+    });
+  });
+}
+
+// Attacher les event listeners pour les liens "Ressources"
+function attachResourcesListeners(contentElement) {
+  contentElement.querySelectorAll(".toggle-resources-link").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const resourcesId = btn.getAttribute("data-resources-id");
+      const resourcesElement = document.getElementById(resourcesId);
+      const textElement = btn.querySelector(".resources-text");
+
+      if (resourcesElement.style.display === "none") {
+        resourcesElement.style.display = "block";
+        textElement.textContent = "Masquer";
+        btn.classList.add("active");
+      } else {
+        resourcesElement.style.display = "none";
+        textElement.textContent = "Ressources";
+        btn.classList.remove("active");
+      }
+    });
+  });
+}
+
+// Mettre à jour le badge d'une catégorie
+function updateCategoryBadge(badgeElement, issuesCount) {
+  badgeElement.textContent = issuesCount;
+
+  if (issuesCount > 0) {
     badgeElement.classList.add("badge-error");
   } else {
     badgeElement.classList.add("badge-success");
   }
+}
 
+function displayCategory(name, data, contentId, badgeId) {
+  const contentElement = document.getElementById(contentId);
+  const badgeElement = document.getElementById(badgeId);
+
+  // Mettre à jour le badge
+  updateCategoryBadge(badgeElement, data.issues.length);
+
+  // Afficher le message de succès ou les issues
   if (data.issues.length === 0) {
     contentElement.innerHTML =
       '<p class="success-message">✅ Aucun problème détecté</p>';
-  } else {
-    contentElement.innerHTML = data.issues
-      .map((issue, issueIndex) => {
-        // Générer le HTML pour les liens MDN
-        const mdnLinks = getMdnLinks(name);
-        let mdnLinksHTML = "";
-
-        if (mdnLinks.length > 0) {
-          const linksContent = mdnLinks
-            .map(
-              (link) =>
-                `<p class="issue-mdn-link"><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title}</a></p>`,
-            )
-            .join("");
-
-          if (issueIndex === 0) {
-            // Première erreur : afficher les liens normalement
-            mdnLinksHTML = linksContent;
-          } else {
-            // Erreurs suivantes : bouton repliable avec ID unique par catégorie
-            mdnLinksHTML = `
-                <div class="mdn-links-collapsed">
-                  <span class="toggle-resources-link" data-resources-id="res-${name}-${issueIndex}">
-                    <svg class="resources-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="resources-text">Ressources</span>
-                  </span>
-                  <div class="mdn-links-content" id="res-${name}-${issueIndex}" style="display: none;">
-                    ${linksContent}
-                  </div>
-                </div>
-              `;
-          }
-        }
-
-        return `
-      <div class="issue ${issue.severity}">
-        <div class="issue-header">
-          <span class="issue-element">${issue.element}</span>
-          <span class="severity-badge severity-${issue.severity}">${issue.severity}</span>
-        </div>
-        <p class="issue-description">${issue.issue}</p>
-        ${issue.explanation ? `<p class="issue-explanation"><svg class="explanation-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13 15.87 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${issue.explanation}</p>` : ""}
-        ${mdnLinksHTML}
-        ${issue.text ? `<p class="issue-detail">Texte: "${issue.text.length > 80 ? `${issue.text.substring(0, 80)}...` : issue.text}"</p>` : ""}
-        ${issue.src ? `<p class="issue-detail">Source: ${issue.src.length > 60 ? `${issue.src.substring(0, 60)}...` : issue.src}</p>` : ""}
-        ${issue.href ? `<p class="issue-detail">Lien: ${issue.href.length > 60 ? `${issue.href.substring(0, 60)}...` : issue.href}</p>` : ""}
-        ${issue.type ? `<p class="issue-detail">Type: ${issue.type}</p>` : ""}
-        ${issue.imageId ? `<button class="goto-btn" data-image-id="${issue.imageId}">Voir dans la page</button>` : ""}
-        ${issue.linkId ? `<button class="goto-btn" data-link-id="${issue.linkId}">Voir dans la page</button>` : ""}
-        ${issue.svgId ? `<button class="goto-btn" data-svg-id="${issue.svgId}">Voir dans la page</button>` : ""}
-        ${issue.headingId ? `<button class="goto-btn" data-heading-id="${issue.headingId}">Voir dans la page</button>` : ""}
-        ${issue.formId ? `<button class="goto-btn" data-form-id="${issue.formId}">Voir dans la page</button>` : ""}
-        ${issue.buttonId ? `<button class="goto-btn" data-button-id="${issue.buttonId}">Voir dans la page</button>` : ""}
-        <button class="markdown-btn" data-issue-index="${issueIndex}" data-category="${name}">Copier Markdown</button>
-      </div>
-    `;
-      })
-      .join("");
-
-    // Ajouter les écouteurs d'événements pour les boutons de navigation
-    if (name === "images") {
-      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const imageId = btn.getAttribute("data-image-id");
-          navigateToImage(imageId);
-        });
-      });
-    }
-
-    if (name === "links") {
-      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const linkId = btn.getAttribute("data-link-id");
-          navigateToLink(linkId);
-        });
-      });
-    }
-
-    if (name === "svg") {
-      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const svgId = btn.getAttribute("data-svg-id");
-          navigateToSVG(svgId);
-        });
-      });
-    }
-
-    if (name === "headings") {
-      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const headingId = btn.getAttribute("data-heading-id");
-          navigateToHeading(headingId);
-        });
-      });
-    }
-
-    if (name === "forms") {
-      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const formId = btn.getAttribute("data-form-id");
-          navigateToForm(formId);
-        });
-      });
-    }
-
-    if (name === "structure") {
-      contentElement.querySelectorAll(".goto-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const buttonId = btn.getAttribute("data-button-id");
-          if (buttonId) {
-            navigateToButton(buttonId);
-          }
-        });
-      });
-    }
-
-    // Ajouter les écouteurs pour les boutons Markdown
-    contentElement.querySelectorAll(".markdown-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const issueIndex = parseInt(btn.getAttribute("data-issue-index"));
-        const category = btn.getAttribute("data-category");
-        const issue = data.issues[issueIndex];
-        copyGitHubMarkdown(issue, category, btn);
-      });
-    });
-
-    // Ajouter les écouteurs pour les liens "Ressources"
-    contentElement.querySelectorAll(".toggle-resources-link").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const resourcesId = btn.getAttribute("data-resources-id");
-        const resourcesElement = document.getElementById(resourcesId);
-        const textElement = btn.querySelector(".resources-text");
-
-        if (resourcesElement.style.display === "none") {
-          resourcesElement.style.display = "block";
-          textElement.textContent = "Masquer";
-          btn.classList.add("active");
-        } else {
-          resourcesElement.style.display = "none";
-          textElement.textContent = "Ressources";
-          btn.classList.remove("active");
-        }
-      });
-    });
+    return;
   }
+
+  // Générer le HTML pour toutes les issues
+  contentElement.innerHTML = data.issues
+    .map((issue, issueIndex) => generateIssueHTML(issue, issueIndex, name))
+    .join("");
+
+  // Attacher tous les event listeners
+  attachNavigationListeners(contentElement, name);
+  attachMarkdownListeners(contentElement, data);
+  attachResourcesListeners(contentElement);
 }
 
 function showError(message) {
@@ -848,4 +940,23 @@ async function updateVisualMarkers() {
   } catch (error) {
     console.error("Erreur lors de la mise à jour des marqueurs:", error);
   }
+}
+
+// ==================== MODE DARK ====================
+
+// Initialiser le mode dark depuis le stockage
+function initDarkMode() {
+  chrome.storage.sync.get(["darkMode"], function (result) {
+    if (result.darkMode) {
+      document.body.classList.add("dark-mode");
+    }
+  });
+}
+
+// Basculer le mode dark
+function toggleDarkMode() {
+  const isDarkMode = document.body.classList.toggle("dark-mode");
+
+  // Sauvegarder la préférence
+  chrome.storage.sync.set({ darkMode: isDarkMode });
 }

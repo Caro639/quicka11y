@@ -184,89 +184,118 @@ function checkImages() {
   };
 }
 
+// Vérifier si un SVG est accessible
+function isSVGAccessible(svg) {
+  const hasRole = svg.getAttribute("role") === "img";
+  const hasAriaLabel =
+    svg.hasAttribute("aria-label") &&
+    svg.getAttribute("aria-label").trim() !== "";
+  const hasTitle = svg.querySelector("title");
+  const isHidden = svg.getAttribute("aria-hidden") === "true";
+
+  return hasRole || hasAriaLabel || hasTitle || isHidden;
+}
+
+// Assurer que le parent du SVG a position: relative
+function ensureSVGParentPositioned(parent) {
+  const originalPosition = window.getComputedStyle(parent).position;
+  if (originalPosition === "static") {
+    parent.style.position = "relative";
+    parent.setAttribute("data-position-changed", "true");
+  }
+}
+
+// Créer un badge pour un SVG problématique
+function createSVGBadge(svg, svgId) {
+  if (
+    svg.parentElement.querySelector(
+      `.accessibility-badge-svg[data-badge-for="${svgId}"]`,
+    )
+  ) {
+    return; // Badge déjà présent
+  }
+
+  const badge = document.createElement("div");
+  badge.className = "accessibility-badge-svg";
+  badge.textContent = "⚠️ SVG NON ACCESSIBLE";
+  badge.setAttribute("data-badge-for", svgId);
+
+  ensureSVGParentPositioned(svg.parentElement);
+  svg.parentElement.appendChild(badge);
+}
+
+// Ajouter le feedback visuel à un SVG problématique
+function addVisualFeedbackToSVG(svg, index) {
+  const svgId = `accessibility-svg-${index}`;
+  svg.setAttribute("data-accessibility-id", svgId);
+
+  // Ajouter les styles visuels (bordure violette)
+  svg.style.outline = "5px solid #a855f7";
+  svg.style.outlineOffset = "3px";
+  svg.style.boxShadow = "0 0 20px rgba(168, 85, 247, 0.6)";
+  svg.setAttribute("data-accessibility-issue", "svg-no-desc");
+
+  // Stocker l'élément
+  markedElements.svgs.push(svg);
+
+  // Créer le badge
+  createSVGBadge(svg, svgId);
+
+  return svgId;
+}
+
+// Supprimer le feedback visuel d'un SVG
+function removeVisualFeedbackFromSVG(svg) {
+  if (svg.getAttribute("data-accessibility-issue") !== "svg-no-desc") {
+    return;
+  }
+
+  // Supprimer les styles
+  svg.style.outline = "";
+  svg.style.outlineOffset = "";
+  svg.style.boxShadow = "";
+  svg.removeAttribute("data-accessibility-issue");
+  svg.removeAttribute("data-accessibility-id");
+
+  // Supprimer le badge
+  const badge = svg.parentElement.querySelector(".accessibility-badge-svg");
+  if (badge) {
+    badge.remove();
+  }
+
+  // Restaurer la position du parent si elle a été changée
+  if (svg.parentElement.getAttribute("data-position-changed") === "true") {
+    svg.parentElement.style.position = "";
+    svg.parentElement.removeAttribute("data-position-changed");
+  }
+}
+
+// Créer un objet issue pour un SVG
+function createSVGIssue(index, svgId) {
+  return {
+    element: `SVG ${index + 1}`,
+    issue: "SVG inline sans description",
+    explanation:
+      'Ajoutez role="img" + aria-label, ou un élément title interne, ou aria-hidden="true" si décoratif',
+    severity: "élevée",
+    svgId: svgId,
+  };
+}
+
 // Vérifier les SVG inline sans attributs d'accessibilité
 function checkSVG() {
   const svgs = document.querySelectorAll("svg");
   const issues = [];
 
   svgs.forEach((svg, index) => {
-    const hasRole = svg.getAttribute("role") === "img";
-    const hasAriaLabel =
-      svg.hasAttribute("aria-label") &&
-      svg.getAttribute("aria-label").trim() !== "";
-    const hasTitle = svg.querySelector("title");
-    const isHidden = svg.getAttribute("aria-hidden") === "true";
-
-    // If le SVG n'a aucun attribut d'accessibilité et n'est pas caché
-    if (!hasRole && !hasAriaLabel && !hasTitle && !isHidden) {
-      // Add unique ID for navigation
-      const svgId = `accessibility-svg-${index}`;
-      svg.setAttribute("data-accessibility-id", svgId);
-
-      // Add visual style (bordure violette)
-      svg.style.outline = "5px solid #a855f7";
-      svg.style.outlineOffset = "3px";
-      svg.style.boxShadow = "0 0 20px rgba(168, 85, 247, 0.6)";
-      svg.setAttribute("data-accessibility-issue", "svg-no-desc");
-
-      // Store l'élément
-      markedElements.svgs.push(svg);
-
-      // Créer et ajouter un badge visuel violet
-      if (
-        !svg.parentElement.querySelector(
-          `.accessibility-badge-svg[data-badge-for="${svgId}"]`,
-        )
-      ) {
-        const badge = document.createElement("div");
-        badge.className = "accessibility-badge-svg";
-        badge.textContent = "⚠️ SVG NON ACCESSIBLE";
-        badge.setAttribute("data-badge-for", svgId);
-
-        // Position badge
-        const svgParent = svg.parentElement;
-        const originalPosition = window.getComputedStyle(svgParent).position;
-        if (originalPosition === "static") {
-          svgParent.style.position = "relative";
-          svgParent.setAttribute("data-position-changed", "true");
-        }
-
-        svgParent.appendChild(badge);
-      }
-
-      issues.push({
-        element: `SVG ${index + 1}`,
-        issue: "SVG inline sans description",
-        explanation:
-          'Ajoutez role="img" + aria-label, ou un élément title interne, ou aria-hidden="true" si décoratif',
-        severity: "élevée",
-        svgId: svgId,
-      });
+    // Vérifier si le SVG est accessible
+    if (!isSVGAccessible(svg)) {
+      // SVG non accessible : ajouter le feedback visuel
+      const svgId = addVisualFeedbackToSVG(svg, index);
+      issues.push(createSVGIssue(index, svgId));
     } else {
-      // Remove style if le SVG est valide
-      if (svg.getAttribute("data-accessibility-issue") === "svg-no-desc") {
-        svg.style.outline = "";
-        svg.style.outlineOffset = "";
-        svg.style.boxShadow = "";
-        svg.removeAttribute("data-accessibility-issue");
-        svg.removeAttribute("data-accessibility-id");
-
-        // Remove badge
-        const badge = svg.parentElement.querySelector(
-          ".accessibility-badge-svg",
-        );
-        if (badge) {
-          badge.remove();
-        }
-
-        // Restore parent position si elle a été changée
-        if (
-          svg.parentElement.getAttribute("data-position-changed") === "true"
-        ) {
-          svg.parentElement.style.position = "";
-          svg.parentElement.removeAttribute("data-position-changed");
-        }
-      }
+      // SVG accessible : supprimer le feedback visuel si présent
+      removeVisualFeedbackFromSVG(svg);
     }
   });
 
@@ -841,9 +870,9 @@ function checkLandmarks() {
   }
 
   return {
-    total: 4,
+    total: 2,
     issues: issues,
-    passed: 4 - issues.length,
+    passed: 2 - issues.length,
   };
 }
 
@@ -1231,41 +1260,59 @@ function scrollToButton(buttonId) {
   }
 }
 
-// Écouter les messages du popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "ping") {
+// Map des gestionnaires d'actions pour réduire la complexité cyclomatique
+const messageHandlers = {
+  ping: (request, sendResponse) => {
     // Répondre au ping pour confirmer que le script est injecté
     sendResponse({ ready: true });
-  } else if (request.action === "runAudit") {
+  },
+  runAudit: (request, sendResponse) => {
     const results = auditAccessibility();
     sendResponse({ results: results });
-  } else if (request.action === "clearVisualFeedback") {
+  },
+  clearVisualFeedback: (request, sendResponse) => {
     clearVisualFeedback();
     sendResponse({ success: true });
-  } else if (request.action === "scrollToImage") {
+  },
+  scrollToImage: (request, sendResponse) => {
     scrollToImage(request.imageId);
     sendResponse({ success: true });
-  } else if (request.action === "scrollToLink") {
+  },
+  scrollToLink: (request, sendResponse) => {
     scrollToLink(request.linkId);
     sendResponse({ success: true });
-  } else if (request.action === "scrollToSVG") {
+  },
+  scrollToSVG: (request, sendResponse) => {
     scrollToSVG(request.svgId);
     sendResponse({ success: true });
-  } else if (request.action === "scrollToHeading") {
+  },
+  scrollToHeading: (request, sendResponse) => {
     scrollToHeading(request.headingId);
     sendResponse({ success: true });
-  } else if (request.action === "scrollToForm") {
+  },
+  scrollToForm: (request, sendResponse) => {
     scrollToForm(request.formId);
     sendResponse({ success: true });
-  } else if (request.action === "scrollToButton") {
+  },
+  scrollToButton: (request, sendResponse) => {
     scrollToButton(request.buttonId);
     sendResponse({ success: true });
-  } else if (request.action === "applyColorblindFilter") {
+  },
+  applyColorblindFilter: (request, sendResponse) => {
     applyColorblindFilter(request.filterType);
     sendResponse({ success: true });
-  } else if (request.action === "updateFilters") {
+  },
+  updateFilters: (request, sendResponse) => {
     updateVisualMarkersWithFilters(request.filters);
     sendResponse({ success: true });
+  },
+};
+
+// Écouter les messages du popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const handler = messageHandlers[request.action];
+  if (handler) {
+    handler(request, sendResponse);
   }
   return true;
 });

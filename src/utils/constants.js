@@ -93,8 +93,8 @@ export const PRIORITY_EMOJIS = {
 
 // Landmarks ARIA
 export const LANDMARKS = {
-  COUNT: 4,
-  REQUIRED: ["main", "nav", "header", "footer"],
+  COUNT: 2,
+  REQUIRED: ["main", "nav"],
 };
 
 // CSS selectors
