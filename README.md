@@ -158,7 +158,6 @@ quicka11y/
 │   │   ├── popup.js             # Logique du popup et communication
 │   │   ├── popup.css            # Styles de l'interface
 │   │   ├── popup-utils.js       # Fonctions pures utilitaires (Clean Code)
-│   │   └── popup-utils.test-wrapper.cjs  # Wrapper CommonJS pour tests (ignoré par Git)
 │   ├── report/
 │   │   ├── report.html          # Page de rapport détaillé
 │   │   └── report.js            # Logique du rapport
