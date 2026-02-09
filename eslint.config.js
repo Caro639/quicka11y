@@ -64,6 +64,11 @@ export default [
     languageOptions: {
       globals: {
         ...jest.environments.globals.globals,
+        // Globals pour jsdom (environnement de test)
+        Event: "readonly",
+        MouseEvent: "readonly",
+        KeyboardEvent: "readonly",
+        CustomEvent: "readonly",
       },
     },
     rules: {
@@ -71,6 +76,34 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "coverage/", "jest.config.js", "jest.setup.js"],
+    // Configuration pour les fichiers de setup Jest
+    files: ["jest.setup.js", "mock-extension-apis.js"],
+    languageOptions: {
+      globals: {
+        ...jest.environments.globals.globals,
+        global: "writable",
+      },
+    },
+    rules: {
+      "no-magic-numbers": "off",
+    },
+  },
+  {
+    // Configuration pour les fichiers CommonJS (.cjs)
+    files: ["**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        module: "readonly",
+        exports: "readonly",
+        require: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        process: "readonly",
+      },
+    },
+  },
+  {
+    ignores: ["node_modules/", "coverage/"],
   },
 ];

@@ -5,3 +5,4 @@ test.md
 node_modules/
 test-deuxLiens.html
 test-enSavoirPlus.html
+src/popup/popup-utils.test-wrapper.cjs

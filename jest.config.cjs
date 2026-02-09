@@ -18,6 +18,7 @@ module.exports = {
     "!coverage/**",
     "!jest.config.js",
     "!jest.setup.js",
+    "!mock-extension-apis.js",
   ],
 
   // Seuils de couverture désactivés pour extensions Chrome
@@ -28,6 +29,10 @@ module.exports = {
   // Format des rapports de couverture
   coverageReporters: ["text", "lcov", "html"],
 
-  // Setup avant les tests
+  // Setup AVANT l'environnement Jest (mocks Chrome API)
+  // Conforme aux recommandations Google pour extensions Chrome
+  setupFiles: ["<rootDir>/mock-extension-apis.js"],
+
+  // Setup APRÈS l'environnement Jest (helpers et cleanup)
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 };

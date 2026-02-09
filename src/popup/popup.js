@@ -5,6 +5,11 @@ import {
   generateGitHubMarkdown,
   copyMarkdownToClipboard,
 } from "../utils/markdown.js";
+import {
+  getMdnLinks,
+  generateIssueHTML,
+  combineStructureData,
+} from "./popup-utils.js";
 
 // État des filtres actifs
 const activeFilters = {
@@ -20,10 +25,6 @@ const activeFilters = {
 
 // Stocker les résultats complets pour pouvoir les filtrer
 let fullResults = null;
-
-// Constantes pour la longueur maximale d'affichage des textes
-const MAX_TEXT_LENGTH = 80;
-const MAX_URL_LENGTH = 60;
 
 document.addEventListener("DOMContentLoaded", function () {
   // Initialiser le mode dark
@@ -418,27 +419,6 @@ function attachColorblindListeners() {
   });
 }
 
-// Combiner les données de structure (lang, landmarks, buttons)
-function combineStructureData(filteredResults) {
-  const structureIssues = [
-    ...filteredResults.lang.issues,
-    ...filteredResults.landmarks.issues,
-    ...filteredResults.buttons.issues,
-  ];
-
-  return {
-    total:
-      filteredResults.lang.total +
-      filteredResults.landmarks.total +
-      filteredResults.buttons.total,
-    issues: structureIssues,
-    passed:
-      filteredResults.lang.passed +
-      filteredResults.landmarks.passed +
-      filteredResults.buttons.passed,
-  };
-}
-
 // Configuration des handlers de navigation par catégorie
 const NAVIGATION_CONFIG = {
   images: { attr: "data-image-id", handler: navigateToImage },
@@ -448,128 +428,6 @@ const NAVIGATION_CONFIG = {
   forms: { attr: "data-form-id", handler: navigateToForm },
   structure: { attr: "data-button-id", handler: navigateToButton },
 };
-
-// Générer le HTML des liens MDN
-function generateMdnLinksHTML(name, issueIndex) {
-  const mdnLinks = getMdnLinks(name);
-
-  if (mdnLinks.length === 0) {
-    return "";
-  }
-
-  const linksContent = mdnLinks
-    .map(
-      (link) =>
-        `<p class="issue-mdn-link"><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.title}</a></p>`,
-    )
-    .join("");
-
-  // Première erreur : afficher les liens normalement
-  if (issueIndex === 0) {
-    return linksContent;
-  }
-
-  // Erreurs suivantes : bouton repliable
-  return `
-    <div class="mdn-links-collapsed">
-      <span class="toggle-resources-link" data-resources-id="res-${name}-${issueIndex}">
-        <svg class="resources-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="resources-text">Ressources</span>
-      </span>
-      <div class="mdn-links-content" id="res-${name}-${issueIndex}" style="display: none;">
-        ${linksContent}
-      </div>
-    </div>
-  `;
-}
-
-// Générer le HTML des détails de l'issue
-function generateIssueDetailsHTML(issue) {
-  const details = [];
-
-  if (issue.text) {
-    const truncatedText =
-      issue.text.length > MAX_TEXT_LENGTH
-        ? `${issue.text.substring(0, MAX_TEXT_LENGTH)}...`
-        : issue.text;
-    details.push(`<p class="issue-detail">Texte: "${truncatedText}"</p>`);
-  }
-
-  if (issue.src) {
-    const truncatedSrc =
-      issue.src.length > MAX_URL_LENGTH
-        ? `${issue.src.substring(0, MAX_URL_LENGTH)}...`
-        : issue.src;
-    details.push(`<p class="issue-detail">Source: ${truncatedSrc}</p>`);
-  }
-
-  if (issue.href) {
-    const truncatedHref =
-      issue.href.length > MAX_URL_LENGTH
-        ? `${issue.href.substring(0, MAX_URL_LENGTH)}...`
-        : issue.href;
-    details.push(`<p class="issue-detail">Lien: ${truncatedHref}</p>`);
-  }
-
-  if (issue.type) {
-    details.push(`<p class="issue-detail">Type: ${issue.type}</p>`);
-  }
-
-  return details.join("");
-}
-
-// Générer le HTML des boutons de navigation
-function generateNavigationButtonsHTML(issue) {
-  const buttons = [];
-  const idTypes = [
-    "imageId",
-    "linkId",
-    "svgId",
-    "headingId",
-    "formId",
-    "buttonId",
-  ];
-
-  idTypes.forEach((idType) => {
-    if (issue[idType]) {
-      buttons.push(
-        `<button class="goto-btn" data-${idType.replace(/Id$/, "-id")}="${issue[idType]}">Voir dans la page</button>`,
-      );
-    }
-  });
-
-  return buttons.join("");
-}
-
-// Générer le HTML d'une issue
-function generateIssueHTML(issue, issueIndex, name) {
-  const mdnLinksHTML = generateMdnLinksHTML(name, issueIndex);
-  const detailsHTML = generateIssueDetailsHTML(issue);
-  const navigationButtonsHTML = generateNavigationButtonsHTML(issue);
-
-  const explanationHTML = issue.explanation
-    ? `<p class="issue-explanation"><svg class="explanation-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13 15.87 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${issue.explanation}</p>`
-    : "";
-
-  return `
-    <div class="issue ${issue.severity}">
-      <div class="issue-header">
-        <span class="issue-element">${issue.element}</span>
-        <span class="severity-badge severity-${issue.severity}">${issue.severity}</span>
-      </div>
-      <p class="issue-description">${issue.issue}</p>
-      ${explanationHTML}
-      ${mdnLinksHTML}
-      ${detailsHTML}
-      ${navigationButtonsHTML}
-      <button class="markdown-btn" data-issue-index="${issueIndex}" data-category="${name}">Copier Markdown</button>
-    </div>
-  `;
-}
 
 // Attacher les event listeners pour les boutons de navigation
 function attachNavigationListeners(contentElement, name) {
@@ -696,89 +554,6 @@ function exportReport(results, score) {
       chrome.tabs.create({ url: reportUrl });
     });
   });
-}
-
-// Fonction pour obtenir le lien MDN selon la catégorie
-function getMdnLinks(category) {
-  const mdnLinks = {
-    images: [
-      {
-        title: "Guide d'accessibilité des images (MDN)",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#accessibilit%C3%A9",
-      },
-      {
-        title: "Attribut alt pour les images",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#fournir_un_texte_de_remplacement_utile",
-      },
-    ],
-    svg: [
-      {
-        title: "Identifier le SVG comme une image",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#identifier_le_svg_comme_une_image",
-      },
-      {
-        title: "Accessibilité des SVG",
-        url: "https://developer.mozilla.org/fr/docs/Web/SVG/Guides/SVG_in_HTML",
-      },
-      {
-        title: "Utiliser role='img' et aria-label",
-        url: "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/img_role#svg_and_roleimg",
-      },
-    ],
-    links: [
-      {
-        title: "Accessibilité des liens",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/a#accessibilit%C3%A9",
-      },
-      {
-        title: "Créer un lien avec une image",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#cr%C3%A9er_un_lien_avec_une_image",
-      },
-      {
-        title: "ARIA: link role",
-        url: "https://developer.mozilla.org/fr/docs/Web/Accessibility/ARIA/Roles/link_role",
-      },
-    ],
-    headings: [
-      {
-        title: "Structurer le contenu avec des titres",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/Heading_Elements#accessibilit%C3%A9",
-      },
-      {
-        title: "Guide des titres et structure",
-        url: "https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique",
-      },
-    ],
-    forms: [
-      {
-        title: "Formulaires accessibles",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Element/input#accessibilit%C3%A9",
-      },
-      {
-        title: "Élément label pour les formulaires",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/label#accessibilit%C3%A9",
-      },
-      {
-        title: "ARIA dans les formulaires",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/form",
-      },
-    ],
-    structure: [
-      {
-        title: "Structure du document et sémantique HTML",
-        url: "https://developer.mozilla.org/fr/docs/Learn_web_development/Core/Accessibility/HTML#une_bonne_s%C3%A9mantique",
-      },
-      {
-        title: "Accessibilité des boutons",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Reference/Elements/button#accessibilit%C3%A9",
-      },
-      {
-        title: "Attribut lang pour la langue",
-        url: "https://developer.mozilla.org/fr/docs/Web/HTML/Global_attributes/lang",
-      },
-    ],
-  };
-  return mdnLinks[category] || [];
 }
 
 // Fonction pour filtrer les résultats selon les filtres actifs

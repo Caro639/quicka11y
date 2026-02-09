@@ -1,28 +1,10 @@
-// Configuration initiale pour tous les tests
-// Ce fichier s'exécute avant chaque test
+/**
+ * Configuration pour l'environnement de test Jest
+ * S'exécute APRÈS l'initialisation de Jest
+ * Contient les helpers et le cleanup automatique
+ */
 
-// Mock de l'API Chrome pour les extensions
-global.chrome = {
-  runtime: {
-    lastError: null,
-    sendMessage: jest.fn(),
-    onMessage: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-  },
-  tabs: {
-    query: jest.fn((queryInfo, callback) => {
-      callback([{ id: 1, url: "https://example.com" }]);
-    }),
-    sendMessage: jest.fn((tabId, message, callback) => {
-      if (callback) {callback({ success: true });}
-    }),
-  },
-  scripting: {
-    executeScript: jest.fn(),
-  },
-};
+// Note : Les mocks Chrome API sont dans mock-extension-apis.js (setupFiles)
 
 // Mock de window.getComputedStyle
 global.window.getComputedStyle = jest.fn(() => ({
@@ -41,8 +23,8 @@ global.cleanDOM = () => {
   document.head.innerHTML = "";
 };
 
-// Nettoyage après chaque test
+// Nettoyage automatique après chaque test
 afterEach(() => {
   jest.clearAllMocks();
-  cleanDOM();
+  global.cleanDOM();
 });
