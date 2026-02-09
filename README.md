@@ -77,7 +77,7 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 ✅ **Score global** - Calcul du taux de conformité en temps réel  
 ✅ **Export de rapport** - Téléchargement d'un rapport texte détaillé  
 ✅ **Messages pédagogiques** - Explications de l'importance de chaque critère  
-✅ **Tests unitaires** - à réaliser avec Jest (70%+ de couverture)
+✅ **Tests unitaires** - 193 tests Jest avec couverture 70%+
 
 ## 🚀 Installation
 
@@ -136,35 +136,39 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 
 ```plaintext
 quicka11y/
-├── manifest.json          # Configuration de l'extension (Manifest V3)
-├── package.json           # Dépendances et scripts NPM
-├── eslint.config.js       # Configuration ESLint
-├── jest.config.cjs        # Configuration Jest pour les tests
-├── jest.setup.js          # Configuration de l'environnement de test
-├── LICENSE                # Licence MIT
-├── README.md              # Documentation (vous êtes ici)
-├── README-DEV.md          # Notes de développement
-├── test.md                # Résultats des tests
-├── icon*.png              # Icônes de l'extension (16, 48, 128)
-├── *.webp                 # Captures d'écran pour la documentation
-├── test-*.html            # Pages HTML de test
+├── manifest.json                # Configuration de l'extension (Manifest V3)
+├── package.json                 # Dépendances et scripts NPM
+├── .gitignore                   # Fichiers à ignorer par Git
+├── eslint.config.js             # Configuration ESLint (Flat Config)
+├── jest.config.cjs              # Configuration Jest pour les tests
+├── jest.setup.js                # Configuration de l'environnement de test
+├── mock-extension-apis.js       # Mocks Chrome API pour les tests (Google recommandations)
+├── LICENSE                      # Licence MIT
+├── README.md                    # Documentation (vous êtes ici)
+├── README-DEV.md                # Notes de développement
+├── test.md                      # Résultats des tests
+├── icon*.png                    # Icônes de l'extension (16, 48, 128)
+├── *.webp                       # Captures d'écran pour la documentation
+├── test-*.html                  # Pages HTML de test
 ├── src/
 │   ├── content/
-│   │   └── content.js     # Analyse du DOM et détection des problèmes
+│   │   └── content.js           # Analyse du DOM et détection des problèmes
 │   ├── popup/
-│   │   ├── popup.html     # Interface utilisateur du popup
-│   │   ├── popup.js       # Logique du popup et communication
-│   │   └── popup.css      # Styles de l'interface
+│   │   ├── popup.html           # Interface utilisateur du popup
+│   │   ├── popup.js             # Logique du popup et communication
+│   │   ├── popup.css            # Styles de l'interface
+│   │   ├── popup-utils.js       # Fonctions pures utilitaires (Clean Code)
+│   │   └── popup-utils.test-wrapper.cjs  # Wrapper CommonJS pour tests (ignoré par Git)
 │   ├── report/
-│   │   ├── report.html    # Page de rapport détaillé
-│   │   └── report.js      # Logique du rapport
+│   │   ├── report.html          # Page de rapport détaillé
+│   │   └── report.js            # Logique du rapport
 │   └── utils/
-│       ├── constants.js   # Constantes partagées (timeouts, scores)
-│       └── markdown.js    # Génération et export Markdown
+│       ├── constants.js         # Constantes partagées (timeouts, scores)
+│       └── markdown.js          # Génération et export Markdown
 └── tests/
-    ├── content.test.js    # Tests unitaires pour content.js
-    ├── popup.test.js      # Tests unitaires pour popup.js
-    └── report.test.js     # Tests unitaires pour report.js
+    ├── content.test.js          # Tests unitaires pour content.js (65 tests)
+    ├── popup.test.js            # Tests unitaires pour popup.js (144 tests)
+    └── report.test.js           # Tests unitaires pour report.js (33 tests)
 ```
 
 ## 💻 Utilisation
