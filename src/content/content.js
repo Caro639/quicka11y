@@ -10,6 +10,11 @@ const markedElements = {
   buttons: [],
 };
 
+// Constantes NodeFilter
+const NODE_FILTER_SHOW_TEXT = 4;
+const NODE_FILTER_ACCEPT = 1;
+const NODE_FILTER_REJECT = 2;
+
 // Main audit function
 function auditAccessibility() {
   // Reset arrays
@@ -389,13 +394,38 @@ function checkLinkHasAccessibleSVG(link) {
 
 // Extract le texte d'un lien (sans SVG, images, badges)
 function extractLinkText(link) {
-  const linkClone = link.cloneNode(true);
-  linkClone
-    .querySelectorAll(
-      "svg, img, .accessibility-badge, .accessibility-badge-link, .accessibility-badge-svg",
-    )
-    .forEach((el) => el.remove());
-  return linkClone.textContent.trim();
+  // Utiliser TreeWalker directement pour éviter les problèmes de cloneNode
+  // avec les images ayant des srcset invalides ou protégés
+  const walker = document.createTreeWalker(link, NODE_FILTER_SHOW_TEXT, {
+    acceptNode: function (node) {
+      const parent = node.parentElement;
+
+      // Rejeter le texte dans les éléments à ignorer
+      if (
+        parent &&
+        (parent.tagName === "SVG" ||
+          parent.tagName === "IMG" ||
+          parent.closest("svg") || // Texte dans un SVG
+          parent.closest("img") || // Texte dans une img (rare)
+          parent.classList.contains("accessibility-badge") ||
+          parent.classList.contains("accessibility-badge-link") ||
+          parent.classList.contains("accessibility-badge-svg"))
+      ) {
+        return NODE_FILTER_REJECT;
+      }
+
+      return NODE_FILTER_ACCEPT;
+    },
+  });
+
+  let text = "";
+  let node = walker.nextNode();
+  while (node) {
+    text += node.textContent;
+    node = walker.nextNode();
+  }
+
+  return text.trim();
 }
 
 // Vérifier si le texte est non descriptif
