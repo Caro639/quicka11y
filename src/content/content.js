@@ -1198,9 +1198,6 @@ function scrollToImage(imageId) {
 
   // Vérifier si l'élément existe
   if (!element) {
-    console.warn(
-      `Élément ${imageId} introuvable - peut-être supprimé du DOM, dans un iframe, ou la page a été modifiée`,
-    );
     return false;
   }
 
@@ -1250,7 +1247,6 @@ function scrollToLink(linkId) {
   const element = document.querySelector(`[data-accessibility-id="${linkId}"]`);
 
   if (!element) {
-    console.warn(`Élément ${linkId} introuvable`);
     return false;
   }
 
@@ -1300,7 +1296,6 @@ function scrollToSVG(svgId) {
   const element = document.querySelector(`[data-accessibility-id="${svgId}"]`);
 
   if (!element) {
-    console.warn(`Élément ${svgId} introuvable`);
     return false;
   }
 
@@ -1352,7 +1347,6 @@ function scrollToHeading(headingId) {
   );
 
   if (!element) {
-    console.warn(`Élément ${headingId} introuvable`);
     return false;
   }
 
@@ -1402,7 +1396,6 @@ function scrollToForm(formId) {
   const element = document.querySelector(`[data-accessibility-id="${formId}"]`);
 
   if (!element) {
-    console.warn(`Élément ${formId} introuvable`);
     return false;
   }
 
@@ -1454,7 +1447,6 @@ function scrollToButton(buttonId) {
   );
 
   if (!element) {
-    console.warn(`Élément ${buttonId} introuvable`);
     return false;
   }
 

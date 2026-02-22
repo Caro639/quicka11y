@@ -1,0 +1,484 @@
+<!doctype html>
+<html>
+  <!-- ❌ ERREUR: lang manquant sur <html> (1 erreur Language) -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Complet - Extension d'Audit d'Accessibilité</title>
+    <style>
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+
+      section {
+        background: #f5f5f5;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+      }
+
+      .test-category {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        margin: 15px 0;
+      }
+
+      .expected-count {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 10px;
+        margin: 10px 0;
+        font-weight: bold;
+      }
+
+      .summary {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        margin: 20px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      .error-code {
+        font-family: monospace;
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ❌ ERREUR: Aucun <main> (1 erreur Landmarks - Structure) -->
+    <!-- ❌ ERREUR: Aucun <nav> (1 erreur Landmarks - Structure) -->
+
+    <h1>Test Complet d'Accessibilité</h1>
+    <p>
+      Ce fichier HTML contient volontairement plusieurs erreurs d'accessibilité
+      pour tester et valider le bon fonctionnement de l'extension.
+    </p>
+
+    <!-- ========================================
+       RÉSUMÉ DES ERREURS ATTENDUES
+  ======================================== -->
+    <section class="summary">
+      <h2>📊 Résumé des erreurs attendues</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Catégorie</th>
+            <th>Type d'erreur</th>
+            <th>Sévérité</th>
+            <th>Nombre attendu</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Images</strong></td>
+            <td>Alt manquant</td>
+            <td>🔴 Élevée</td>
+            <td><strong>3</strong></td>
+          </tr>
+          <tr>
+            <td><strong>SVG</strong></td>
+            <td>SVG non accessible</td>
+            <td>🔴 Élevée</td>
+            <td><strong>3</strong></td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>Liens</strong></td>
+            <td>Lien vide (sans texte)</td>
+            <td>🔴 Élevée</td>
+            <td><strong>2</strong></td>
+          </tr>
+          <tr>
+            <td>Texte non descriptif</td>
+            <td>🟡 Moyenne</td>
+            <td><strong>4</strong></td>
+          </tr>
+          <tr>
+            <td rowspan="4"><strong>Titres (Headings)</strong></td>
+            <td>Multiple H1</td>
+            <td>🟡 Moyenne</td>
+            <td><strong>1</strong></td>
+          </tr>
+          <tr>
+            <td>Saut de niveau (H1→H3)</td>
+            <td>🟡 Moyenne</td>
+            <td><strong>1</strong></td>
+          </tr>
+          <tr>
+            <td>Saut de niveau (H2→H5)</td>
+            <td>🟡 Moyenne</td>
+            <td><strong>1</strong></td>
+          </tr>
+          <tr>
+            <td>Titre vide</td>
+            <td>🔴 Élevée</td>
+            <td><strong>2</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Formulaires</strong></td>
+            <td>Champ sans label</td>
+            <td>🔴 Élevée</td>
+            <td><strong>3</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Boutons</strong></td>
+            <td>Bouton sans texte</td>
+            <td>🔴 Élevée</td>
+            <td><strong>2</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Language</strong></td>
+            <td>Attribut lang manquant sur &lt;html&gt;</td>
+            <td>🔴 Élevée</td>
+            <td><strong>1</strong></td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>Landmarks</strong></td>
+            <td>Aucun &lt;main&gt;</td>
+            <td>🟡 Moyenne</td>
+            <td><strong>1</strong></td>
+          </tr>
+          <tr>
+            <td>Aucun &lt;nav&gt;</td>
+            <td>🔵 Faible</td>
+            <td><strong>1</strong></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr
+            style="
+              background-color: #ffeb3b;
+              font-weight: bold;
+              font-size: 1.1em;
+            "
+          >
+            <td colspan="3">TOTAL DES ERREURS ATTENDUES</td>
+            <td><strong>25 erreurs</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- ========================================
+       TEST 1: IMAGES SANS ALT
+  ======================================== -->
+    <section class="test-category">
+      <h2>Test 1 : Images sans attribut alt</h2>
+      <div class="expected-count">✅ Attendu : 3 erreurs (sévérité élevée)</div>
+
+      <p>Image 1 - Alt manquant (devrait être détectée) :</p>
+      <img src="https://via.placeholder.com/150" />
+
+      <p>Image 2 - Alt vide (devrait être détectée) :</p>
+      <img src="https://via.placeholder.com/150" alt="" />
+
+      <p>Image 3 - Alt avec espaces seulement (devrait être détectée) :</p>
+      <img src="https://via.placeholder.com/150" alt="   " />
+
+      <p>Image 4 - Alt valide (NE devrait PAS être détectée) :</p>
+      <img
+        src="https://via.placeholder.com/150"
+        alt="Description valide de l'image"
+      />
+    </section>
+
+    <!-- ========================================
+       TEST 2: SVG NON ACCESSIBLES
+  ======================================== -->
+    <section class="test-category">
+      <h2>Test 2 : SVG non accessibles</h2>
+      <div class="expected-count">✅ Attendu : 3 erreurs (sévérité élevée)</div>
+
+      <p>
+        SVG 1 - Sans aucun attribut d'accessibilité (devrait être détecté) :
+      </p>
+      <svg width="50" height="50">
+        <circle cx="25" cy="25" r="20" fill="red" />
+      </svg>
+
+      <p>SVG 2 - Sans attribut d'accessibilité (devrait être détecté) :</p>
+      <svg width="50" height="50">
+        <rect width="50" height="50" fill="blue" />
+      </svg>
+
+      <p>SVG 3 - Avec aria-label vide (devrait être détecté) :</p>
+      <svg width="50" height="50" aria-label="">
+        <polygon points="25,5 45,45 5,45" fill="green" />
+      </svg>
+
+      <p>
+        SVG 4 - Avec role="img" et aria-label (NE devrait PAS être détecté) :
+      </p>
+      <svg width="50" height="50" role="img" aria-label="Cercle jaune">
+        <circle cx="25" cy="25" r="20" fill="yellow" />
+      </svg>
+
+      <p>SVG 5 - Décoratif avec aria-hidden (NE devrait PAS être détecté) :</p>
+      <svg width="50" height="50" aria-hidden="true">
+        <circle cx="25" cy="25" r="20" fill="purple" />
+      </svg>
+
+      <p>SVG 6 - Avec élément title (NE devrait PAS être détecté) :</p>
+      <svg width="50" height="50">
+        <title>Cercle orange</title>
+        <circle cx="25" cy="25" r="20" fill="orange" />
+      </svg>
+    </section>
+
+    <!-- ========================================
+       TEST 3: LIENS PROBLÉMATIQUES
+  ======================================== -->
+    <section class="test-category">
+      <h2>Test 3 : Liens problématiques</h2>
+      <div class="expected-count">
+        ✅ Attendu : 6 erreurs (2 élevées + 4 moyennes)
+      </div>
+
+      <h3>Liens vides (sévérité élevée)</h3>
+      <p>Lien 1 - Complètement vide (devrait être détecté) :</p>
+      <a href="page1.html"></a>
+
+      <p>Lien 2 - Avec espaces seulement (devrait être détecté) :</p>
+      <a href="page2.html"> </a>
+
+      <h3>Liens avec texte non descriptif (sévérité moyenne)</h3>
+      <p>
+        Article intéressant. <a href="article1.html">cliquez ici</a> pour plus
+        d'informations.
+      </p>
+
+      <p>Découvrez notre service. <a href="service.html">en savoir plus</a></p>
+
+      <p>Consultez notre documentation. <a href="docs.html">voir</a></p>
+
+      <p>
+        Histoire complète disponible. <a href="story.html">lire la suite</a>
+      </p>
+
+      <h3>Liens valides (ne devraient PAS être détectés)</h3>
+      <p><a href="contact.html">Contactez-nous</a></p>
+
+      <p>
+        <a href="page.html" aria-label="En savoir plus sur notre produit X"
+          >en savoir plus</a
+        >
+      </p>
+
+      <p>
+        <a href="image.html">
+          <img
+            src="https://via.placeholder.com/50"
+            alt="Logo de l'entreprise"
+          />
+        </a>
+      </p>
+    </section>
+
+    <!-- ========================================
+       TEST 4: STRUCTURE DES TITRES
+  ======================================== -->
+    <section class="test-category">
+      <!-- ❌ ERREUR: Multiple H1 (ce H1 ci-dessous est le 2ème) -->
+      <h1>Test 4 : Structure des titres (ce H1 est en trop !)</h1>
+      <div class="expected-count">
+        ✅ Attendu : 4 erreurs (2 élevées + 2 moyennes)
+      </div>
+
+      <p>Structure problématique :</p>
+      <ul>
+        <li>✅ H1 en haut de page : OK</li>
+        <li>❌ Ce H1 : Erreur (2ème H1)</li>
+        <li>❌ H3 ci-dessous : Saut de niveau H1→H3</li>
+        <li>❌ H5 plus bas : Saut de niveau H2→H5</li>
+        <li>❌ Titres vides : 2 erreurs</li>
+      </ul>
+
+      <!-- ❌ ERREUR: Saut de niveau H1 → H3 -->
+      <h3>Sous-titre de niveau 3 (saut depuis H1)</h3>
+      <p>
+        Ce titre H3 saute directement depuis le H1, ce qui devrait être détecté.
+      </p>
+
+      <h2>Titre de niveau 2 (correct)</h2>
+      <p>Ce titre H2 est correct.</p>
+
+      <!-- ❌ ERREUR: Titre vide -->
+      <h3></h3>
+
+      <!-- ❌ ERREUR: Saut de niveau H2 → H5 -->
+      <h5>Titre de niveau 5 (saut depuis H2)</h5>
+
+      <!-- ❌ ERREUR: Titre vide avec espaces -->
+      <h4></h4>
+
+      <h3>Titre correct de niveau 3</h3>
+      <p>Ce titre suit correctement la hiérarchie.</p>
+    </section>
+
+    <!-- ========================================
+       TEST 5: FORMULAIRES SANS LABEL
+  ======================================== -->
+    <section class="test-category">
+      <h2>Test 5 : Champs de formulaire sans label</h2>
+      <div class="expected-count">✅ Attendu : 3 erreurs (sévérité élevée)</div>
+
+      <form>
+        <p>Champ 1 - Input sans label (devrait être détecté) :</p>
+        <!-- ❌ ERREUR: Input sans label -->
+        <input type="text" name="field1" />
+
+        <p>Champ 2 - Textarea sans label (devrait être détecté) :</p>
+        <!-- ❌ ERREUR: Textarea sans label -->
+        <textarea name="field2"></textarea>
+
+        <p>Champ 3 - Select sans label (devrait être détecté) :</p>
+        <!-- ❌ ERREUR: Select sans label -->
+        <select name="field3">
+          <option>Option 1</option>
+          <option>Option 2</option>
+        </select>
+
+        <p>
+          Champ 4 - Input avec label associé par 'for' (NE devrait PAS être
+          détecté) :
+        </p>
+        <label for="field4">Nom :</label>
+        <input type="text" id="field4" name="field4" />
+
+        <p>Champ 5 - Input avec aria-label (NE devrait PAS être détecté) :</p>
+        <input type="text" name="field5" aria-label="Email" />
+
+        <p>
+          Champ 6 - Input avec aria-labelledby (NE devrait PAS être détecté) :
+        </p>
+        <span id="phone-label">Téléphone :</span>
+        <input type="tel" name="field6" aria-labelledby="phone-label" />
+
+        <p>Champ 7 - Input dans un label (NE devrait PAS être détecté) :</p>
+        <label>
+          Adresse :
+          <input type="text" name="field7" />
+        </label>
+
+        <button type="submit">Envoyer</button>
+      </form>
+    </section>
+
+    <!-- ========================================
+       TEST 6: BOUTONS SANS TEXTE
+  ======================================== -->
+    <section class="test-category">
+      <h2>Test 6 : Boutons sans texte descriptif</h2>
+      <div class="expected-count">✅ Attendu : 2 erreurs (sévérité élevée)</div>
+
+      <p>Bouton 1 - Complètement vide (devrait être détecté) :</p>
+      <!-- ❌ ERREUR: Bouton sans texte -->
+      <button></button>
+
+      <p>Bouton 2 - Avec espaces seulement (devrait être détecté) :</p>
+      <!-- ❌ ERREUR: Bouton sans texte -->
+      <button></button>
+
+      <p>Bouton 3 - Avec texte (NE devrait PAS être détecté) :</p>
+      <button>Cliquer ici</button>
+
+      <p>Bouton 4 - Avec aria-label (NE devrait PAS être détecté) :</p>
+      <button aria-label="Fermer la fenêtre">×</button>
+
+      <p>Bouton 5 - Avec icône et texte (NE devrait PAS être détecté) :</p>
+      <button>🔍 Rechercher</button>
+    </section>
+
+    <!-- ========================================
+       RÉCAPITULATIF FINAL
+  ======================================== -->
+    <section class="summary">
+      <h2>✅ Validation du test</h2>
+      <p><strong>Vérifiez que l'extension détecte exactement :</strong></p>
+      <ul style="font-size: 1.1em; line-height: 2">
+        <li>🔴 <strong>Images :</strong> 3 erreurs (alt manquant)</li>
+        <li>🔴 <strong>SVG :</strong> 3 erreurs (non accessibles)</li>
+        <li>
+          🔴 <strong>Liens :</strong> 2 erreurs élevées (vides) + 4 erreurs
+          moyennes (texte non descriptif) = 6 erreurs
+        </li>
+        <li>
+          🟡 <strong>Titres :</strong> 1 erreur (multiple H1) + 2 erreurs (sauts
+          de niveau) + 2 erreurs (titres vides) = 5 erreurs
+        </li>
+        <li>🔴 <strong>Formulaires :</strong> 3 erreurs (champs sans label)</li>
+        <li>🔴 <strong>Boutons :</strong> 2 erreurs (sans texte)</li>
+        <li>
+          🔴 <strong>Language :</strong> 1 erreur (lang manquant sur
+          &lt;html&gt;)
+        </li>
+        <li>
+          🟡 <strong>Landmarks :</strong> 2 erreurs (pas de &lt;main&gt; ni
+          &lt;nav&gt;)
+        </li>
+      </ul>
+      <p style="font-size: 1.3em; font-weight: bold; color: #d32f2f">
+        📊 TOTAL :
+        <span style="background: yellow; padding: 5px">25 erreurs</span>
+      </p>
+      <p
+        style="
+          margin-top: 20px;
+          padding: 15px;
+          background: #fff3e0;
+          border-radius: 5px;
+        "
+      >
+        <strong
+          >🎯 Si l'extension compte un nombre différent d'erreurs pour une
+          catégorie,</strong
+        >
+        vérifiez le code de détection pour cette catégorie spécifique dans
+        <span class="error-code">src/content/content.js</span>
+      </p>
+    </section>
+
+    <footer
+      style="
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #ccc;
+        text-align: center;
+        color: #666;
+      "
+    >
+      <p>
+        Fichier de test créé pour valider l'extension d'audit d'accessibilité
+      </p>
+      <p>Dernière mise à jour : 22 février 2026</p>
+    </footer>
+  </body>
+</html>
