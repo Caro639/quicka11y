@@ -2,7 +2,6 @@
 
 // Protection contre les injections multiples du script
 if (window.accessibilityAuditInjected) {
-  console.log("Script d'audit déjà injecté, abandon de la nouvelle injection");
   // Ne pas continuer l'exécution du script
   throw new Error("Script already injected");
 }
