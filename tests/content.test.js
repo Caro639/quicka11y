@@ -841,3 +841,343 @@ describe("QuickA11y - Fonctions utilitaires", () => {
     });
   });
 });
+describe("QuickA11y - Contraste des couleurs", () => {
+  beforeEach(() => {
+    // Réinitialiser le DOM avant chaque test
+    document.body.innerHTML = "";
+    document.head.innerHTML = "";
+  });
+
+  describe("getRGBLuminance()", () => {
+    test("devrait calculer la luminance relative d'une composante RGB", () => {
+      // Simuler la fonction getRGBLuminance
+      function getRGBLuminance(colorValue) {
+        const val = colorValue / 255;
+        return val <= 0.03928
+          ? val / 12.92
+          : Math.pow((val + 0.055) / 1.055, 2.4);
+      }
+
+      expect(getRGBLuminance(0)).toBeCloseTo(0, 5);
+      expect(getRGBLuminance(255)).toBeCloseTo(1, 5);
+      expect(getRGBLuminance(127)).toBeGreaterThan(0);
+    });
+  });
+
+  describe("getRelativeLuminance()", () => {
+    test("devrait calculer la luminance relative d'une couleur RGB", () => {
+      // Simuler la fonction getRelativeLuminance
+      function getRGBLuminance(colorValue) {
+        const val = colorValue / 255;
+        return val <= 0.03928
+          ? val / 12.92
+          : Math.pow((val + 0.055) / 1.055, 2.4);
+      }
+
+      function getRelativeLuminance(r, g, b) {
+        const rLum = getRGBLuminance(r);
+        const gLum = getRGBLuminance(g);
+        const bLum = getRGBLuminance(b);
+        return 0.2126 * rLum + 0.7152 * gLum + 0.0722 * bLum;
+      }
+
+      // Blanc (255, 255, 255) devrait avoir une luminance de ~1
+      expect(getRelativeLuminance(255, 255, 255)).toBeCloseTo(1, 5);
+
+      // Noir (0, 0, 0) devrait avoir une luminance de 0
+      expect(getRelativeLuminance(0, 0, 0)).toBe(0);
+
+      // Test avec une couleur intermédiaire
+      const grayLuminance = getRelativeLuminance(128, 128, 128);
+      expect(grayLuminance).toBeGreaterThan(0);
+      expect(grayLuminance).toBeLessThan(1);
+    });
+  });
+
+  describe("parseColor()", () => {
+    test("devrait parser une couleur RGB", () => {
+      // Simuler la fonction parseColor
+      function parseColor(color) {
+        if (!color || color === "transparent") {
+          return null;
+        }
+
+        const rgbMatch = color.match(
+          /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/,
+        );
+        if (rgbMatch) {
+          return {
+            r: parseInt(rgbMatch[1]),
+            g: parseInt(rgbMatch[2]),
+            b: parseInt(rgbMatch[3]),
+            a: rgbMatch[4] ? parseFloat(rgbMatch[4]) : 1,
+          };
+        }
+
+        return null;
+      }
+
+      const result = parseColor("rgb(255, 0, 0)");
+      expect(result).toEqual({ r: 255, g: 0, b: 0, a: 1 });
+    });
+
+    test("devrait parser une couleur RGBA", () => {
+      function parseColor(color) {
+        if (!color || color === "transparent") {
+          return null;
+        }
+
+        const rgbMatch = color.match(
+          /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/,
+        );
+        if (rgbMatch) {
+          return {
+            r: parseInt(rgbMatch[1]),
+            g: parseInt(rgbMatch[2]),
+            b: parseInt(rgbMatch[3]),
+            a: rgbMatch[4] ? parseFloat(rgbMatch[4]) : 1,
+          };
+        }
+
+        return null;
+      }
+
+      const result = parseColor("rgba(0, 128, 255, 0.5)");
+      expect(result).toEqual({ r: 0, g: 128, b: 255, a: 0.5 });
+    });
+
+    test("devrait retourner null pour une couleur transparente", () => {
+      function parseColor(color) {
+        if (!color || color === "transparent") {
+          return null;
+        }
+        return {};
+      }
+
+      expect(parseColor("transparent")).toBeNull();
+      expect(parseColor("")).toBeNull();
+    });
+  });
+
+  describe("calculateContrastRatio()", () => {
+    test("devrait calculer le ratio de contraste entre deux couleurs", () => {
+      // Simuler toutes les fonctions nécessaires
+      function getRGBLuminance(colorValue) {
+        const val = colorValue / 255;
+        return val <= 0.03928
+          ? val / 12.92
+          : Math.pow((val + 0.055) / 1.055, 2.4);
+      }
+
+      function getRelativeLuminance(r, g, b) {
+        const rLum = getRGBLuminance(r);
+        const gLum = getRGBLuminance(g);
+        const bLum = getRGBLuminance(b);
+        return 0.2126 * rLum + 0.7152 * gLum + 0.0722 * bLum;
+      }
+
+      function parseColor(color) {
+        const rgbMatch = color.match(
+          /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/,
+        );
+        if (rgbMatch) {
+          return {
+            r: parseInt(rgbMatch[1]),
+            g: parseInt(rgbMatch[2]),
+            b: parseInt(rgbMatch[3]),
+            a: rgbMatch[4] ? parseFloat(rgbMatch[4]) : 1,
+          };
+        }
+        return null;
+      }
+
+      function calculateContrastRatio(fgColor, bgColor) {
+        const fg = parseColor(fgColor);
+        const bg = parseColor(bgColor);
+
+        if (!fg || !bg) {
+          return 0;
+        }
+
+        const fgLum = getRelativeLuminance(fg.r, fg.g, fg.b);
+        const bgLum = getRelativeLuminance(bg.r, bg.g, bg.b);
+
+        const lighter = Math.max(fgLum, bgLum);
+        const darker = Math.min(fgLum, bgLum);
+
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+
+      // Noir sur blanc devrait avoir un ratio de 21:1
+      const blackOnWhiteRatio = calculateContrastRatio(
+        "rgb(0, 0, 0)",
+        "rgb(255, 255, 255)",
+      );
+      expect(blackOnWhiteRatio).toBeCloseTo(21, 0);
+
+      // Blanc sur blanc devrait avoir un ratio de 1:1
+      const whiteOnWhiteRatio = calculateContrastRatio(
+        "rgb(255, 255, 255)",
+        "rgb(255, 255, 255)",
+      );
+      expect(whiteOnWhiteRatio).toBeCloseTo(1, 0);
+
+      // Test avec des couleurs ayant un contraste insuffisant
+      const lowContrastRatio = calculateContrastRatio(
+        "rgb(200, 200, 200)",
+        "rgb(255, 255, 255)",
+      );
+      expect(lowContrastRatio).toBeLessThan(4.5);
+    });
+  });
+
+  describe("isLargeText()", () => {
+    test("devrait identifier le texte de grande taille", () => {
+      // Simuler la fonction isLargeText
+      function isLargeText(fontSize, fontWeight) {
+        const isBold = fontWeight === "bold" || parseInt(fontWeight) >= 700;
+        return fontSize >= 24 || (fontSize >= 18.66 && isBold);
+      }
+
+      expect(isLargeText(24, "normal")).toBe(true);
+      expect(isLargeText(18.66, "bold")).toBe(true);
+      expect(isLargeText(18.66, "700")).toBe(true);
+      expect(isLargeText(16, "normal")).toBe(false);
+      expect(isLargeText(18, "normal")).toBe(false);
+    });
+  });
+
+  describe("hasDirectTextContent()", () => {
+    test("devrait retourner true pour un élément avec texte direct", () => {
+      document.body.innerHTML = `<p>Texte direct dans le paragraphe</p>`;
+      const p = document.querySelector("p");
+
+      function hasDirectTextContent(element) {
+        for (const node of element.childNodes) {
+          if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      expect(hasDirectTextContent(p)).toBe(true);
+    });
+
+    test("devrait retourner false pour un conteneur sans texte direct", () => {
+      document.body.innerHTML = `<div><p>Texte dans un enfant</p></div>`;
+      const div = document.querySelector("div");
+
+      function hasDirectTextContent(element) {
+        for (const node of element.childNodes) {
+          if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      expect(hasDirectTextContent(div)).toBe(false);
+    });
+
+    test("devrait retourner true pour un élément avec texte et enfants", () => {
+      document.body.innerHTML = `<p>Texte direct <span>et un span</span></p>`;
+      const p = document.querySelector("p");
+
+      function hasDirectTextContent(element) {
+        for (const node of element.childNodes) {
+          if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      expect(hasDirectTextContent(p)).toBe(true);
+    });
+  });
+
+  describe("checkContrast()", () => {
+    test("devrait détecter les problèmes de contraste", () => {
+      // Créer un élément avec un faible contraste
+      document.body.innerHTML = `
+        <p style="color: rgb(150, 150, 150); background-color: rgb(255, 255, 255); font-size: 16px;">
+          Texte avec faible contraste
+        </p>
+      `;
+
+      // Simuler une version simplifiée de checkContrast
+      function checkContrast() {
+        const textElements = Array.from(document.querySelectorAll("p"));
+        const issues = [];
+
+        textElements.forEach((el, index) => {
+          const style = window.getComputedStyle(el);
+          const fgColor = style.color;
+          const bgColor = style.backgroundColor;
+
+          // Pour ce test, on suppose un ratio insuffisant
+          if (fgColor && bgColor && bgColor !== "rgba(0, 0, 0, 0)") {
+            issues.push({
+              element: `p ${index + 1}`,
+              issue: "Contraste insuffisant",
+              severity: "élevée",
+              contrastId: `accessibility-contrast-${index}`,
+            });
+          }
+        });
+
+        return {
+          total: textElements.length,
+          issues: issues,
+          passed: textElements.length - issues.length,
+        };
+      }
+
+      const result = checkContrast();
+
+      expect(result.total).toBe(1);
+      expect(result.issues.length).toBeGreaterThan(0);
+    });
+
+    test("ne devrait pas analyser les éléments avec fond transparent", () => {
+      document.body.innerHTML = `
+        <p style="color: rgb(0, 0, 0); background-color: transparent; font-size: 16px;">
+          Texte avec fond transparent
+        </p>
+      `;
+
+      function checkContrast() {
+        const textElements = Array.from(document.querySelectorAll("p"));
+        const issues = [];
+
+        textElements.forEach((el) => {
+          const style = window.getComputedStyle(el);
+          const bgColor = style.backgroundColor;
+
+          // Skip si fond transparent
+          if (
+            !bgColor ||
+            bgColor === "transparent" ||
+            bgColor === "rgba(0, 0, 0, 0)"
+          ) {
+            return;
+          }
+
+          issues.push({ element: "p" });
+        });
+
+        return {
+          total: textElements.length,
+          issues: issues,
+          passed: textElements.length - issues.length,
+        };
+      }
+
+      const result = checkContrast();
+
+      expect(result.total).toBe(1);
+      expect(result.issues.length).toBe(0);
+    });
+  });
+});

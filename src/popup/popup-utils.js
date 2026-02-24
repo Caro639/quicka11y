@@ -107,6 +107,16 @@ export function getMdnLinks(category) {
         url: "https://developer.mozilla.org/fr/docs/Web/HTML/Global_attributes/lang",
       },
     ],
+    contrast: [
+      {
+        title: "Comprendre le contraste WCAG (WebAIM)",
+        url: "https://webaim.org/articles/contrast/",
+      },
+      {
+        title: "Color Contrast - Guide WCAG",
+        url: "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html",
+      },
+    ],
   };
   return mdnLinks[category] || [];
 }
@@ -158,36 +168,40 @@ export function generateMdnLinksHTML(name, issueIndex) {
   `;
 }
 
+// ============================================================================
+// FONCTIONS DE GÉNÉRATION HTML - DÉTAILS D'ISSUES
+// ============================================================================
+
 /**
- * Génère le HTML des détails d'une issue (texte, src, href, type)
- * Tronque les textes longs selon MAX_TEXT_LENGTH et MAX_URL_LENGTH
- * @param {Object} issue - Objet issue avec propriétés optionnelles
- * @returns {string} - HTML des détails
+ * Tronque une chaîne si elle dépasse la longueur maximale
+ * @param {string} text - Texte à tronquer
+ * @param {number} maxLength - Longueur maximale
+ * @returns {string} - Texte tronqué avec "..." si nécessaire
  */
-export function generateIssueDetailsHTML(issue) {
+function truncateText(text, maxLength) {
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+}
+
+/**
+ * Génère le HTML pour les détails textuels standards (text, src, href, type)
+ * @param {Object} issue - Objet issue
+ * @returns {Array<string>} - Tableau de HTML pour les détails textuels
+ */
+function generateStandardTextDetails(issue) {
   const details = [];
 
   if (issue.text) {
-    const truncatedText =
-      issue.text.length > MAX_TEXT_LENGTH
-        ? `${issue.text.substring(0, MAX_TEXT_LENGTH)}...`
-        : issue.text;
+    const truncatedText = truncateText(issue.text, MAX_TEXT_LENGTH);
     details.push(`<p class="issue-detail">Texte: "${truncatedText}"</p>`);
   }
 
   if (issue.src) {
-    const truncatedSrc =
-      issue.src.length > MAX_URL_LENGTH
-        ? `${issue.src.substring(0, MAX_URL_LENGTH)}...`
-        : issue.src;
+    const truncatedSrc = truncateText(issue.src, MAX_URL_LENGTH);
     details.push(`<p class="issue-detail">Source: ${truncatedSrc}</p>`);
   }
 
   if (issue.href) {
-    const truncatedHref =
-      issue.href.length > MAX_URL_LENGTH
-        ? `${issue.href.substring(0, MAX_URL_LENGTH)}...`
-        : issue.href;
+    const truncatedHref = truncateText(issue.href, MAX_URL_LENGTH);
     details.push(`<p class="issue-detail">Lien: ${truncatedHref}</p>`);
   }
 
@@ -195,7 +209,52 @@ export function generateIssueDetailsHTML(issue) {
     details.push(`<p class="issue-detail">Type: ${issue.type}</p>`);
   }
 
-  return details.join("");
+  return details;
+}
+
+/**
+ * Génère le HTML pour les détails spécifiques au contraste
+ * @param {Object} issue - Objet issue avec propriétés de contraste
+ * @returns {Array<string>} - Tableau de HTML pour les détails de contraste
+ */
+function generateContrastDetails(issue) {
+  const details = [];
+
+  if (issue.ratio) {
+    details.push(
+      `<p class="issue-detail">Ratio actuel: <strong>${issue.ratio}:1</strong> (minimum requis: <strong>${issue.required}:1</strong>)</p>`,
+    );
+  }
+
+  if (issue.fgColor && issue.bgColor) {
+    details.push(
+      `<p class="issue-detail">Couleur texte: <span style="padding: 2px 6px;">${issue.fgColor}</span></p>`,
+    );
+    details.push(
+      `<p class="issue-detail">Couleur fond: <span style="padding: 2px 6px;">${issue.bgColor}</span></p>`,
+    );
+  }
+
+  if (issue.fontSize) {
+    details.push(
+      `<p class="issue-detail">Taille de police: ${issue.fontSize}</p>`,
+    );
+  }
+
+  return details;
+}
+
+/**
+ * Génère le HTML des détails d'une issue (texte, src, href, type, contraste)
+ * Fonction orchestratrice qui délègue à des fonctions spécialisées
+ * @param {Object} issue - Objet issue avec propriétés optionnelles
+ * @returns {string} - HTML des détails
+ */
+export function generateIssueDetailsHTML(issue) {
+  const standardDetails = generateStandardTextDetails(issue);
+  const contrastDetails = generateContrastDetails(issue);
+
+  return [...standardDetails, ...contrastDetails].join("");
 }
 
 /**
@@ -212,6 +271,7 @@ export function generateNavigationButtonsHTML(issue) {
     "headingId",
     "formId",
     "buttonId",
+    "contrastId",
   ];
 
   idTypes.forEach((idType) => {

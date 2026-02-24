@@ -310,6 +310,44 @@ h1 {
   padding: 10px;
 }
 
+.contrast-disclaimer {
+  font-size: 12px;
+  color: #0f172a;
+  background: #f0fdf4;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border-left: 3px solid #16a34a;
+  font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.contrast-disclaimer::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2L2 7L12 12L22 7L12 2Z' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 17L12 22L22 17' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 12L12 17L22 12' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.contrast-disclaimer a {
+  color: #16a34a;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.contrast-disclaimer a:hover {
+  color: #15803d;
+  text-decoration: none;
+}
+
 /* Issues */
 .issue {
   background: #f3e8ff;
@@ -802,6 +840,22 @@ body.dark-mode {
   border-bottom: 1px solid #16a34a;
   border-top: 1px solid #16a34a;
   color: #f1f5f9;
+}
+
+.dark-mode .contrast-disclaimer {
+  background: #1e293b;
+  border-right: 1px solid #16a34a;
+  border-bottom: 1px solid #16a34a;
+  border-top: 1px solid #16a34a;
+  color: #f1f5f9;
+}
+
+.dark-mode .contrast-disclaimer a {
+  color: #4ade80;
+}
+
+.dark-mode .contrast-disclaimer a:hover {
+  color: #22c55e;
 }
 
 .dark-mode .issue-mdn-link a {
