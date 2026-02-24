@@ -65,6 +65,7 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 - **🔗 Liens** : Vérification des liens sans texte descriptif
 - **📋 Titres** : Validation de la hiérarchie des titres (H1-H6)
 - **📝 Formulaires** : Contrôle des champs sans étiquettes `<label>`
+- **🎨 Contraste des couleurs** : Vérification automatique du ratio de contraste WCAG 2.1 AA (texte sur fonds unis)
 - **👁️ Filtre Daltonisme** : Test de perception des couleurs pour les personnes daltoniennes
 - **🏗️ Structure** : Vérification de l'attribut `lang`, landmarks ARIA et boutons
 
@@ -73,11 +74,12 @@ Faciliter l'identification et la correction des problèmes d'accessibilité pour
 ✅ **Marqueurs visuels** - Bordures de couleur animées + badges sur les éléments problématiques  
 ✅ **Navigation rapide** - Boutons "Voir dans la page" pour scroller vers les erreurs
 ✅ **Catégorisation des problèmes** - Par type et sévérité (Erreur, Avertissement, Info)
-✅ **Ressources utiles** - Liens MDN pour chaque critère non conforme
+✅ **Ressources utiles** - Liens MDN et WebAIM pour chaque critère non conforme
 ✅ **Score global** - Calcul du taux de conformité en temps réel  
 ✅ **Export de rapport** - Téléchargement d'un rapport texte détaillé  
 ✅ **Messages pédagogiques** - Explications de l'importance de chaque critère  
-✅ **Tests unitaires** - 193 tests Jest avec couverture 70%+
+✅ **Vérification du contraste** - Analyse WCAG 2.1 AA du ratio de contraste (4.5:1 pour texte normal, 3:1 pour texte large)
+✅ **Tests unitaires** - 193+ tests Jest avec couverture 70%+
 
 ## 🚀 Installation
 
@@ -252,12 +254,11 @@ npm run test:coverage
 
 - [x] Tests unitaires avec Jest ✅
 - [x] Couverture de code 70%+ ✅
+- [x] **Intégration du calcul du contraste (WCAG 2.1 AA)** ✅
 - [ ] Support de WCAG 3.0 (WCAG-Next)
 - [ ] CI/CD avec GitHub Actions
 - [ ] Intégration avec axe-core pour analyses avancées
-- [ ] Export PDF avec jsPDF ou copier dans le presse-papiers pour un partage rapide et facile sur tout support.
 - [ ] Export audit en print version à imprimer dans un nouvel onglet
-- [ ] Mode sombre
 - [ ] Historique des audits (Chrome Storage API)
 - [ ] Support multilingue (i18n)
 - [ ] Graphiques visuels avec Chart.js
