@@ -65,6 +65,50 @@ const TEXT_NODE_TYPE = 3; // Type de noeud pour les text nodes (Node.TEXT_NODE)
 // Limite de performance pour l'analyse du contraste
 const MAX_CONTRAST_ELEMENTS = 500; // Nombre maximum d'éléments à analyser (augmenté pour pages complexes)
 
+// Constante pour la longueur maximale des snippets HTML
+const MAX_HTML_SNIPPET_LENGTH = 500; // Nombre maximum de caractères pour un snippet HTML
+
+// ============= FONCTION UTILITAIRE POUR LES SNIPPETS HTML =============
+
+/**
+ * Génère un extrait de code HTML propre pour un élément
+ * @param {HTMLElement} element - L'élément DOM à extraire
+ * @returns {string} - Snippet HTML nettoyé et tronqué si nécessaire
+ */
+function generateHTMLSnippet(element) {
+  if (!element || !element.outerHTML) {
+    return "";
+  }
+
+  // Cloner l'élément pour ne pas modifier l'original
+  const clone = element.cloneNode(true);
+
+  // Supprimer les attributs ajoutés par notre extension
+  clone.removeAttribute("data-accessibility-id");
+  clone.removeAttribute("data-accessibility-issue");
+  clone.removeAttribute("data-position-changed");
+
+  // Supprimer aussi les styles ajoutés par notre extension
+  clone.style.outline = "";
+  clone.style.outlineOffset = "";
+  clone.style.boxShadow = "";
+  clone.style.border = "";
+  clone.style.animation = "";
+
+  // Supprimer les badges d'accessibilité du clone
+  const badges = clone.querySelectorAll('[class*="accessibility-badge"]');
+  badges.forEach((badge) => badge.remove());
+
+  let html = clone.outerHTML;
+
+  // Tronquer si trop long
+  if (html.length > MAX_HTML_SNIPPET_LENGTH) {
+    html = `${html.substring(0, MAX_HTML_SNIPPET_LENGTH)}...`;
+  }
+
+  return html;
+}
+
 // Main audit function
 function auditAccessibility() {
   // Nettoyer les marqueurs de l'audit précédent pour éviter les doublons
@@ -311,6 +355,7 @@ function processContrastElement(el, issueIndex) {
       bgColor: bgColor,
       fontSize: `${fontSize.toFixed(1)}px`,
       contrastId: contrastId,
+      htmlSnippet: generateHTMLSnippet(el),
     };
   }
 
@@ -568,6 +613,7 @@ function checkImages() {
         severity: "élevée",
         src: img.src,
         imageId: imageId,
+        htmlSnippet: generateHTMLSnippet(img),
       });
     } else {
       // Remove style if l'image a un alt valide
@@ -691,7 +737,7 @@ function removeVisualFeedbackFromSVG(svg) {
 }
 
 // Créer un objet issue pour un SVG
-function createSVGIssue(index, svgId) {
+function createSVGIssue(svg, index, svgId) {
   return {
     element: `SVG ${index + 1}`,
     issue: "SVG inline sans description",
@@ -699,6 +745,7 @@ function createSVGIssue(index, svgId) {
       'Ajoutez role="img" + aria-label, ou un élément title interne, ou aria-hidden="true" si décoratif',
     severity: "élevée",
     svgId: svgId,
+    htmlSnippet: generateHTMLSnippet(svg),
   };
 }
 
@@ -712,7 +759,7 @@ function checkSVG() {
     if (!isSVGAccessible(svg)) {
       // SVG non accessible : ajouter le feedback visuel
       const svgId = addVisualFeedbackToSVG(svg, index);
-      issues.push(createSVGIssue(index, svgId));
+      issues.push(createSVGIssue(svg, index, svgId));
     } else {
       // SVG accessible : supprimer le feedback visuel si présent
       removeVisualFeedbackFromSVG(svg);
@@ -758,6 +805,7 @@ function analyzeLinkAccessibility(link, index) {
   // Case 1 : Lien sans description accessible
   if (!hasAccessibleDescription) {
     return createLinkIssue(
+      link,
       index,
       "Lien sans texte descriptif",
       "Sans texte, un utilisateur non-voyant ne sait pas où mène ce lien !",
@@ -769,6 +817,7 @@ function analyzeLinkAccessibility(link, index) {
   // Case 2 : Texte non descriptif sans aria-label
   if (isNonDescriptiveText(text) && !ariaLabel) {
     return createLinkIssue(
+      link,
       index,
       "Texte de lien non descriptif",
       "Ajoutez un aria-label pour décrire la destination (ex: aria-label='En savoir plus sur [sujet]')",
@@ -855,7 +904,7 @@ function isNonDescriptiveText(text) {
 }
 
 // Créer un objet d'issue pour un lien
-function createLinkIssue(index, issue, explanation, severity, details) {
+function createLinkIssue(link, index, issue, explanation, severity, details) {
   const linkId = `accessibility-link-${index}`;
   return {
     element: `Lien ${index + 1}`,
@@ -863,6 +912,7 @@ function createLinkIssue(index, issue, explanation, severity, details) {
     explanation: explanation,
     severity: severity,
     linkId: linkId,
+    htmlSnippet: generateHTMLSnippet(link),
     ...details,
   };
 }
@@ -1052,6 +1102,7 @@ function checkHeadings() {
         severity: "moyenne",
         text: heading.textContent.trim(),
         headingId: headingId,
+        htmlSnippet: generateHTMLSnippet(heading),
       });
 
       issueIndex++;
@@ -1100,6 +1151,7 @@ function checkHeadings() {
           "Un titre vide n'apporte aucune information et perturbe la navigation pour les utilisateurs de technologies d'assistance.",
         severity: "élevée",
         headingId: headingId,
+        htmlSnippet: generateHTMLSnippet(heading),
       });
 
       issueIndex++;
@@ -1201,6 +1253,7 @@ function checkForms() {
         severity: "élevée",
         type: input.type || "text",
         formId: formId,
+        htmlSnippet: generateHTMLSnippet(input),
       });
 
       issueIndex++;
@@ -1400,6 +1453,7 @@ function checkButtons() {
           "Un bouton sans texte ou aria-label est inutilisable pour les utilisateurs de lecteurs d'écran qui ne comprennent pas son action.",
         severity: "élevée",
         buttonId: buttonId,
+        htmlSnippet: generateHTMLSnippet(button),
       });
 
       issueIndex++;
@@ -1981,7 +2035,7 @@ function scrollToContrast(contrastId) {
   }
 }
 
-// Map des gestionnaires d'actions pour réduire la complexité cyclomatique
+// Map des gestionnaires d'actions pour réduire la complexité
 const messageHandlers = {
   ping: (request, sendResponse) => {
     // Répondre au ping pour confirmer que le script est injecté

@@ -31,7 +31,7 @@
 
 ---
 
-## ✅ Solutions implémentées
+## Solutions implémentées
 
 ### 1. **Détection robuste des erreurs**
 
@@ -65,9 +65,7 @@ try {
 
 ---
 
-## 📊 Statistiques de réussite attendues
-
-D'après mon expérience, voici les taux de réussite attendus :
+## Statistiques de réussite attendues
 
 | Type de site                    | Taux de réussite ScrollTo |
 | ------------------------------- | ------------------------- |
@@ -80,19 +78,12 @@ D'après mon expérience, voici les taux de réussite attendus :
 
 ---
 
-### Option 1 : Garder le scrollTo avec avertissement
+### Option 1 : Garder le scrollTo
 
 **Avantages :**
 
 - Fonctionne dans la majorité des cas
 - Très utile pour les utilisateurs
-- Différenciateur par rapport aux autres outils
-
-**Communication :**
-
-> "⚠️ Note : Le bouton 'Voir dans la page' fonctionne dans la plupart des cas.
-> Si un élément n'est pas trouvé (page dynamique, élément dans un iframe),
-> vérifiez la console (F12) pour plus d'informations."
 
 ### Option 2 : Désactiver pour certains types d'éléments
 
@@ -133,7 +124,7 @@ Le feedback indique si l'élément **existe dans le DOM**, pas s'il est visible.
 
 ---
 
-## 🚀 Pour aller plus loin (améliorations futures)
+## Pour aller plus loin (améliorations futures)
 
 ### Version 2.0 - Idées pour améliorer la robustesse du scrollTo dans les cas difficiles
 
@@ -184,10 +175,9 @@ Le feedback indique si l'élément **existe dans le DOM**, pas s'il est visible.
 
 ---
 
-## 📝 Checklist avant publication
+## Checklist
 
 - [x] Gestion d'erreur robuste implémentée
-- [x] Logging des erreurs dans la console
 - [x] Retour de succès/échec
 - [x] Feedback visuel dans la popup (bouton vert/rouge)
 - [ ] Tester sur 5-10 sites différents
@@ -195,5 +185,3 @@ Le feedback indique si l'élément **existe dans le DOM**, pas s'il est visible.
 - [ ] Ajouter une note dans le README
 
 ---
-
-Le scrollTo est maintenant aussi robuste que possible compte tenu des contraintes techniques du web.

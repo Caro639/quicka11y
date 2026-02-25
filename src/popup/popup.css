@@ -490,6 +490,67 @@ h1 {
   padding-left: 8px;
 }
 
+/* Code snippet container */
+.code-snippet-container {
+  margin-top: 10px;
+}
+
+.toggle-code-snippet {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.toggle-code-snippet:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.toggle-code-snippet .code-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.toggle-code-snippet:hover .code-icon {
+  transform: scale(1.1);
+}
+
+.code-snippet-content {
+  margin-top: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-snippet-content pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  background: #f8fafc;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.code-snippet-content code {
+  color: #334155;
+  background: none;
+  display: block;
+  white-space: pre;
+  word-wrap: normal;
+}
+
 /* Lien MDN */
 .issue-mdn-link {
   font-size: 11px;
@@ -919,4 +980,29 @@ body.dark-mode {
 .dark-mode .colorblind-info {
   background: #1e293b;
   color: #94a3b8;
+}
+
+/* Dark mode - Code snippet */
+.dark-mode .toggle-code-snippet {
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.dark-mode .toggle-code-snippet:hover {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.dark-mode .code-snippet-content {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .code-snippet-content pre {
+  background: #0f172a;
+}
+
+.dark-mode .code-snippet-content code {
+  color: #cbd5e1;
 }

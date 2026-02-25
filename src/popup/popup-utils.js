@@ -245,6 +245,48 @@ function generateContrastDetails(issue) {
 }
 
 /**
+ * Échappe les caractères HTML pour un affichage sûr dans le code
+ * @param {string} html - Code HTML à échapper
+ * @returns {string} - HTML échappé
+ */
+function escapeHTML(html) {
+  const div = document.createElement("div");
+  div.textContent = html;
+  return div.innerHTML;
+}
+
+/**
+ * Génère le HTML pour afficher un extrait de code
+ * @param {string} htmlSnippet - Extrait de code HTML
+ * @param {string} name - Nom de la catégorie
+ * @param {number} issueIndex - Index de l'issue
+ * @returns {string} - HTML de l'extrait de code
+ */
+export function generateCodeSnippetHTML(htmlSnippet, name, issueIndex) {
+  if (!htmlSnippet) {
+    return "";
+  }
+
+  const escapedSnippet = escapeHTML(htmlSnippet);
+  const snippetId = `code-snippet-${name}-${issueIndex}`;
+
+  return `
+    <div class="code-snippet-container">
+      <button class="toggle-code-snippet" data-snippet-id="${snippetId}">
+        <svg class="code-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 18L22 12L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 6L2 12L8 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Voir le code HTML</span>
+      </button>
+      <div class="code-snippet-content" id="${snippetId}" style="display: none;">
+        <pre><code>${escapedSnippet}</code></pre>
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Génère le HTML des détails d'une issue (texte, src, href, type, contraste)
  * Fonction orchestratrice qui délègue à des fonctions spécialisées
  * @param {Object} issue - Objet issue avec propriétés optionnelles
@@ -296,6 +338,11 @@ export function generateNavigationButtonsHTML(issue) {
 export function generateIssueHTML(issue, issueIndex, name) {
   const mdnLinksHTML = generateMdnLinksHTML(name, issueIndex);
   const detailsHTML = generateIssueDetailsHTML(issue);
+  const codeSnippetHTML = generateCodeSnippetHTML(
+    issue.htmlSnippet,
+    name,
+    issueIndex,
+  );
   const navigationButtonsHTML = generateNavigationButtonsHTML(issue);
 
   const explanationHTML = issue.explanation
@@ -312,6 +359,7 @@ export function generateIssueHTML(issue, issueIndex, name) {
       ${explanationHTML}
       ${mdnLinksHTML}
       ${detailsHTML}
+      ${codeSnippetHTML}
       ${navigationButtonsHTML}
       <button class="markdown-btn" data-issue-index="${issueIndex}" data-category="${name}">Copier Markdown</button>
     </div>

@@ -561,6 +561,27 @@ function attachResourcesListeners(contentElement) {
   });
 }
 
+// Attacher les event listeners pour les boutons "Voir le code HTML"
+function attachCodeSnippetListeners(contentElement) {
+  contentElement.querySelectorAll(".toggle-code-snippet").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const snippetId = btn.getAttribute("data-snippet-id");
+      const snippetElement = document.getElementById(snippetId);
+      const textElement = btn.querySelector("span");
+
+      if (snippetElement.style.display === "none") {
+        snippetElement.style.display = "block";
+        textElement.textContent = "Masquer le code";
+        btn.classList.add("active");
+      } else {
+        snippetElement.style.display = "none";
+        textElement.textContent = "Voir le code HTML";
+        btn.classList.remove("active");
+      }
+    });
+  });
+}
+
 // Mettre à jour le badge d'une catégorie
 function updateCategoryBadge(badgeElement, issuesCount) {
   badgeElement.textContent = issuesCount;
@@ -602,6 +623,7 @@ function displayCategory(name, data, contentId, badgeId) {
   attachNavigationListeners(contentElement, name);
   attachMarkdownListeners(contentElement, data);
   attachResourcesListeners(contentElement);
+  attachCodeSnippetListeners(contentElement);
 }
 
 function showError(message) {
